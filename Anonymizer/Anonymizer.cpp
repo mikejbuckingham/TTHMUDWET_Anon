@@ -25,12 +25,12 @@ int CAnonymizer::ScanFolder(std::string sFolder, int& nProgress)
 {
     // TODO - What does this do?
 //	m_sFolder = sFolder;
-//	m_sFolder.TrimRight(_T("/"));
-//	if (m_sFolder.Right(1) != _T("\\"))
-//		m_sFolder += _T("\\");
+//	m_sFolder.TrimRight(("/"));
+//	if (m_sFolder.Right(1) != ("\\"))
+//		m_sFolder += ("\\");
 
 	m_FileList.clear();
-    //ScanFolderForFiles(m_sFolder, _T("*.*"), nProgress);
+    ScanFolderForFiles(m_sFolder, ("*.*"), nProgress);
 	CreateDictionary();
 
 	return m_FileList.size();
@@ -180,7 +180,7 @@ void CAnonymizer::ScanFolderForFiles(std::string sFolder, std::string sFileName,
 {
     // todo - unfuck all of this
 //    std::string sCast = sFolder;
-//	ASSERT(sCast.Right(1) == _T("\\"));
+//	ASSERT(sCast.Right(1) == ("\\"));
 //	sCast += sFileName;
 
 //	enum FolderType
@@ -205,7 +205,7 @@ void CAnonymizer::ScanFolderForFiles(std::string sFolder, std::string sFileName,
 //		}
 //		else if (FF.IsDirectory())
 //		{
-//            std::string sNewFolder = std::string(sFolder) + FF.GetFileName() + _T("\\");
+//            std::string sNewFolder = std::string(sFolder) + FF.GetFileName() + ("\\");
 //			ScanFolderForFiles(sNewFolder, sFileName, nProgress);
 //			continue;
 //		}
