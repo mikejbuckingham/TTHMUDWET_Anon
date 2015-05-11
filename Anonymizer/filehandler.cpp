@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <ostream>
 
 #include <QDebug>
 
@@ -78,4 +79,16 @@ char* FileHandler::getFileAsBinary(std::string iFilename, size_t& length)
 
     length = size;
     return memoryBlock;
+}
+
+char* FileHandler::writeFileFromBinary(std::string iFilename, size_t length, char* binaryFile)
+{
+    char* result = NULL;
+    std::streampos size;
+    std::ofstream file;
+    file.open(iFilename.c_str(), std::ios::out|std::ios::binary);
+    file.write(binaryFile, length);
+    file.close();
+
+    return result;
 }
