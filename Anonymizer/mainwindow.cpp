@@ -12,6 +12,9 @@
 #include <iostream>
 
 #include <QDir>
+#include <QDirIterator>
+
+#include <DirMaker.h>
 
 const std::string OSSeperator = "/";
 
@@ -44,11 +47,27 @@ void MainWindow::on_actionOpen_Folder_triggered()
                                                            QFileDialog::ShowDirsOnly
                                                            | QFileDialog::DontResolveSymlinks);
 
-    QDir aQDir(folderName);
+    QStringList listOfFiles;
+    QStringList listOfDirs;
 
-    QStringList listOfFiles = aQDir.entryList();
+    QDirIterator it(folderName, QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    while (it.hasNext())
+    {
+        listOfFiles << it.next().remove(folderName);
+    }
 
-    //FileSizeTuple* memoryArray = new FileSizeTuple[listOfFiles.length()];
+    QDirIterator itdir(folderName, QDir::Dirs |QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    while (itdir.hasNext())
+    {
+        listOfDirs << itdir.next().remove(folderName);
+    }
+
+    for (int i = 0; i < listOfDirs.size(); i++)
+    {
+        std::cout << listOfDirs[i].toStdString() << std::endl;
+    }
+
+
 
     std::vector<FileSizeTuple> aFileSizeVector;
 
@@ -59,24 +78,27 @@ void MainWindow::on_actionOpen_Folder_triggered()
 
 
     // let's do a hack for now (need to strip the .. and .)
-    for (int i = 2; i < listOfFiles.length(); i++)
-    {
-        std::string filename = folderName.toStdString() + OSSeperator + listOfFiles[i].toStdString();
-        aStringVector.push_back(filename);
-        std::cout << filename << std::endl;
-    }
-
-    // open all the files
-    for (int i = 0; i < aStringVector.size(); i++)
+    for (int i = 0; i < listOfFiles.length(); i++)
     {
         size_t size = 0;
-        FileSizeTuple aFileSizeTuple;
-        aFileSizeTuple.filename = aStringVector[i];
-        aFileSizeTuple.filePointer = aFileHandler.getFileAsBinary(aStringVector[i], size);
-        aFileSizeTuple.size = size;
+        if (!listOfFiles[i].endsWith("."))
+        {
+            std::string filename = folderName.toStdString() + listOfFiles[i].toStdString();
+            FileSizeTuple aFileSizeTuple;
+            aFileSizeTuple.filename = listOfFiles[i].toStdString();
+            aFileSizeTuple.filePointer = aFileHandler.getFileAsBinary(filename, size);
+            aFileSizeTuple.size = size;
 
-        if (aFileSizeTuple.filePointer)
-            aFileSizeVector.push_back(aFileSizeTuple);
+            if (aFileSizeTuple.filePointer)
+                aFileSizeVector.push_back(aFileSizeTuple);
+            else
+            {
+                std::cout << "ABORT ABORT ABORT" << std::endl;
+                std::cout << aFileSizeTuple.filename;
+                std::abort();
+
+            }
+        }
     }
 
     // search dicom tag, hardcoded patient name
@@ -89,8 +111,6 @@ void MainWindow::on_actionOpen_Folder_triggered()
 
     std::string stdResult = result.toStdString();
 
-    // write out name
-
     // TODO - Can files have different name lengths? That would be pretty shitty
 
     if (stdResult.length() > dataLength)
@@ -100,9 +120,28 @@ void MainWindow::on_actionOpen_Folder_triggered()
 
 
 
+    // Create directory structure and write content
     for (int i = 0; i < aFileSizeVector.size(); i++)
     {
-        std::string newFileName = folderName.toStdString() + OSSeperator + "Anon" + OSSeperator + aFileSizeVector[i].filename;
+
+        std::string newDirName = folderName.toStdString() + OSSeperator + "Anon";
+
+        if(!isDirExist(newDirName))
+        {
+            makePath(newDirName);
+        }
+
+        for (int p = 0; p < listOfDirs.size(); p++)
+        {
+            std::string newSubDir = newDirName + listOfDirs[p].toStdString();
+
+            if (!isDirExist(newSubDir))
+            {
+                makePath(newSubDir);
+            }
+        }
+
+        std::string newFileName = folderName.toStdString() + OSSeperator + "Anon" + aFileSizeVector[i].filename;
 
         char* filePointer = aFileSizeVector[i].filePointer;
         size_t size = aFileSizeVector[i].size;
@@ -122,7 +161,6 @@ void MainWindow::on_actionOpen_Folder_triggered()
 
 
         aFileHandler.writeFileFromBinary(newFileName, size, filePointer);
-
     }
 
 

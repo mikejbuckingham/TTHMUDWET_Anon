@@ -19,6 +19,7 @@ SOURCES += main.cpp\
 
 HEADERS  += mainwindow.h \
     Anonymizer.h \
-    filehandler.h
+    filehandler.h \
+    DirMaker.h
 
 FORMS    += mainwindow.ui

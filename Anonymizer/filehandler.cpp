@@ -6,6 +6,8 @@
 
 #include <QDebug>
 
+
+
 FileHandler::FileHandler()
 {
 }
@@ -86,6 +88,9 @@ char* FileHandler::writeFileFromBinary(std::string iFilename, size_t length, cha
     char* result = NULL;
     std::streampos size;
     std::ofstream file;
+
+
+
     file.open(iFilename.c_str(), std::ios::out|std::ios::binary);
     file.write(binaryFile, length);
     file.close();
