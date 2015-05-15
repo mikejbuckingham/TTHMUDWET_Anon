@@ -6,10 +6,76 @@
 
 #include <QDebug>
 
+#include <vector>
+
+#include <QFileDialog>
+
+#include <QDir>
+#include <QDirIterator>
 
 
 FileHandler::FileHandler()
 {
+}
+
+std::vector<FileSizeTuple> FileHandler::getFileSizeVector(QWidget* caller)
+{
+    QString folderName = QFileDialog::getExistingDirectory(caller, "Open Directory",
+                                                           "/home",
+                                                           QFileDialog::ShowDirsOnly
+                                                           | QFileDialog::DontResolveSymlinks);
+
+    QStringList listOfFiles;
+    QStringList listOfDirs;
+
+    QDirIterator it(folderName, QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    while (it.hasNext())
+    {
+        listOfFiles << it.next().remove(folderName);
+    }
+
+    QDirIterator itdir(folderName, QDir::Dirs |QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    while (itdir.hasNext())
+    {
+        listOfDirs << itdir.next().remove(folderName);
+    }
+
+    for (int i = 0; i < listOfDirs.size(); i++)
+    {
+        std::cout << listOfDirs[i].toStdString() << std::endl;
+    }
+
+    std::vector<FileSizeTuple> aFileSizeVector;
+
+
+    FileHandler aFileHandler;
+
+    std::vector<std::string> aStringVector;
+
+
+    // let's do a hack for now (need to strip the .. and .)
+    for (int i = 0; i < listOfFiles.length(); i++)
+    {
+        size_t size = 0;
+        if (!listOfFiles[i].endsWith("."))
+        {
+            std::string filename = folderName.toStdString() + listOfFiles[i].toStdString();
+            FileSizeTuple aFileSizeTuple;
+            aFileSizeTuple.filename = listOfFiles[i].toStdString();
+            aFileSizeTuple.filePointer = aFileHandler.getFileAsBinary(filename, size);
+            aFileSizeTuple.size = size;
+
+            if (aFileSizeTuple.filePointer)
+                aFileSizeVector.push_back(aFileSizeTuple);
+            else
+            {
+                std::cout << "ABORT ABORT ABORT" << std::endl;
+                std::cout << aFileSizeTuple.filename;
+                std::abort();
+
+            }
+        }
+    }
 }
 
 char* FileHandler::SeekDicomTag(char* memoryBlock, unsigned int tag, size_t length, size_t& oDataLength)

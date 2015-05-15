@@ -14,17 +14,14 @@
 #include <QDir>
 #include <QDirIterator>
 
+#include <QMessageBox>
+
 #include <DirMaker.h>
 
 const std::string OSSeperator = "/";
+std::string newFolderName = "Anon";
 
-struct FileSizeTuple
-{
-    FileSizeTuple() { filePointer = 0; size = 0; }
-    std::string filename;
-    char* filePointer;
-    size_t size;
-};
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -32,6 +29,10 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowTitle("MUSIC Dicom Anonymisation Tool");
+    this->firstInput = true;
+    this->ui->radioZip->setChecked(true);
+    this->dateString = "NONE";
+    this->nameString = "NONE";
 }
 
 MainWindow::~MainWindow()
@@ -111,6 +112,7 @@ void MainWindow::on_actionOpen_Folder_triggered()
 
     std::string stdResult = result.toStdString();
 
+
     // TODO - Can files have different name lengths? That would be pretty shitty
 
     if (stdResult.length() > dataLength)
@@ -124,7 +126,7 @@ void MainWindow::on_actionOpen_Folder_triggered()
     for (int i = 0; i < aFileSizeVector.size(); i++)
     {
 
-        std::string newDirName = folderName.toStdString() + OSSeperator + "Anon";
+        std::string newDirName = folderName.toStdString() + OSSeperator + newFolderName;
 
         if(!isDirExist(newDirName))
         {
@@ -141,7 +143,7 @@ void MainWindow::on_actionOpen_Folder_triggered()
             }
         }
 
-        std::string newFileName = folderName.toStdString() + OSSeperator + "Anon" + aFileSizeVector[i].filename;
+        std::string newFileName = folderName.toStdString() + OSSeperator + newFolderName + aFileSizeVector[i].filename;
 
         char* filePointer = aFileSizeVector[i].filePointer;
         size_t size = aFileSizeVector[i].size;
@@ -209,4 +211,56 @@ void MainWindow::on_action_Open_triggered()
     aFileHandler.writeFileFromBinary(newFileName, size, memoryBlock);
 
     delete memoryBlock;
+}
+
+void MainWindow::on_actionClose_triggered()
+{
+    exit(0);
+}
+
+void MainWindow::on_newPushButton_clicked()
+{
+    // if we have already opened at least one file this session,
+    // we need to prompt
+
+    if (!firstInput)
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "New Session?", "Keep anonymisation key?",
+                                      QMessageBox::Yes|QMessageBox::No);
+
+        if (reply == QMessageBox::Yes)
+        {
+
+        }
+        else
+        {
+            this->nameString = "NONE";
+            this->dateString = "NONE";
+            this->ui->nameAnonUI->setText(QString(this->nameString.c_str()));
+            this->ui->dateAnonUI->setText(QString(this->dateString.c_str()));
+        }
+    }
+    else
+        firstInput = false;
+}
+
+void MainWindow::on_setStringsButton_clicked()
+{
+    QString nameResult = QInputDialog::getText(0, "Enter string", "Name:");
+
+    std::string nameResultStd = nameResult.toStdString();
+
+    this->nameString = nameResultStd;
+
+    QString dateResult = QInputDialog::getText(0, "Enter string", "Birthdate:");
+
+    std::string dateResultStd = dateResult.toStdString();
+
+    this->dateString = dateResultStd;
+
+    this->ui->nameAnonUI->setText(QString(this->nameString.c_str()));
+    this->ui->dateAnonUI->setText(QString(this->dateString.c_str()));
+
+    this->firstInput = false;
 }
