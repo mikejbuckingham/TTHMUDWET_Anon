@@ -30,9 +30,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowTitle("MUSIC Dicom Anonymisation Tool");
     this->firstInput = true;
+    this->isAnon = false;
     this->ui->radioZip->setChecked(true);
     this->dateString = "NONE";
     this->nameString = "NONE";
+    this->nameLength = 0;
+    this->dateLength = 0;
 }
 
 MainWindow::~MainWindow()
@@ -42,129 +45,43 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionOpen_Folder_triggered()
 {
-
-    QString folderName = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
-                                                           "/home",
-                                                           QFileDialog::ShowDirsOnly
-                                                           | QFileDialog::DontResolveSymlinks);
-
-    QStringList listOfFiles;
-    QStringList listOfDirs;
-
-    QDirIterator it(folderName, QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-    while (it.hasNext())
-    {
-        listOfFiles << it.next().remove(folderName);
-    }
-
-    QDirIterator itdir(folderName, QDir::Dirs |QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-    while (itdir.hasNext())
-    {
-        listOfDirs << itdir.next().remove(folderName);
-    }
-
-    for (int i = 0; i < listOfDirs.size(); i++)
-    {
-        std::cout << listOfDirs[i].toStdString() << std::endl;
-    }
-
-
-
-    std::vector<FileSizeTuple> aFileSizeVector;
-
-
+    // Get all files and read them into memory
     FileHandler aFileHandler;
+    QString folderName;
 
-    std::vector<std::string> aStringVector;
-
-
-    // let's do a hack for now (need to strip the .. and .)
-    for (int i = 0; i < listOfFiles.length(); i++)
+    if (!fileSizeVector.empty())
     {
-        size_t size = 0;
-        if (!listOfFiles[i].endsWith("."))
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "File already open!", "Close current file?",
+                                      QMessageBox::Yes|QMessageBox::No);
+
+        if (reply == QMessageBox::Yes)
         {
-            std::string filename = folderName.toStdString() + listOfFiles[i].toStdString();
-            FileSizeTuple aFileSizeTuple;
-            aFileSizeTuple.filename = listOfFiles[i].toStdString();
-            aFileSizeTuple.filePointer = aFileHandler.getFileAsBinary(filename, size);
-            aFileSizeTuple.size = size;
+            for (unsigned int i = 0; i < fileSizeVector.size(); i++)
+                delete [] fileSizeVector[i].filePointer;
 
-            if (aFileSizeTuple.filePointer)
-                aFileSizeVector.push_back(aFileSizeTuple);
-            else
-            {
-                std::cout << "ABORT ABORT ABORT" << std::endl;
-                std::cout << aFileSizeTuple.filename;
-                std::abort();
+            fileSizeVector.clear();
 
-            }
         }
+        else
+            return;
     }
 
-    // search dicom tag, hardcoded patient name
+    fileSizeVector = aFileHandler.getFileSizeVector(this, folderName, listOfDirs);
+
+    if (fileSizeVector.empty())
+        return;
+
+    // read first file and check max lengths of key tags (name and date of birth)
     size_t dataLength = 0;
-    char* filePointer = aFileSizeVector[0].filePointer;
-    size_t size = aFileSizeVector[0].size;
-    char* name = aFileHandler.SeekDicomTag(filePointer, 0x00100010, size, dataLength);
+    char* filePointer = fileSizeVector[0].filePointer;
+    size_t size = fileSizeVector[0].size;
 
-    QString result = QInputDialog::getText(0, "Change name", "Value:");
+    aFileHandler.SeekDicomTag(filePointer, 0x00100010, size, dataLength);
+    this->nameLength = dataLength;
 
-    std::string stdResult = result.toStdString();
-
-
-    // TODO - Can files have different name lengths? That would be pretty shitty
-
-    if (stdResult.length() > dataLength)
-    {
-        std::cout << "Error : Cannot fit";
-    }
-
-
-
-    // Create directory structure and write content
-    for (int i = 0; i < aFileSizeVector.size(); i++)
-    {
-
-        std::string newDirName = folderName.toStdString() + OSSeperator + newFolderName;
-
-        if(!isDirExist(newDirName))
-        {
-            makePath(newDirName);
-        }
-
-        for (int p = 0; p < listOfDirs.size(); p++)
-        {
-            std::string newSubDir = newDirName + listOfDirs[p].toStdString();
-
-            if (!isDirExist(newSubDir))
-            {
-                makePath(newSubDir);
-            }
-        }
-
-        std::string newFileName = folderName.toStdString() + OSSeperator + newFolderName + aFileSizeVector[i].filename;
-
-        char* filePointer = aFileSizeVector[i].filePointer;
-        size_t size = aFileSizeVector[i].size;
-        char* name = aFileHandler.SeekDicomTag(filePointer, 0x00100010, size, dataLength);
-
-        for (int i = 0; i < dataLength; i++)
-        {
-            // zero the content
-            name[i] = 0;
-        }
-
-        for (int i = 0; i < stdResult.length(); i++)
-        {
-            name[i] = stdResult[i];
-        }
-
-
-
-        aFileHandler.writeFileFromBinary(newFileName, size, filePointer);
-    }
-
+    aFileHandler.SeekDicomTag(filePointer, 0x00100030, size, dataLength);
+    this->dateLength = dataLength;
 
 }
 
@@ -196,13 +113,13 @@ void MainWindow::on_action_Open_triggered()
         std::cout << "Error : Cannot fit";
     }
 
-    for (int i = 0; i < dataLength; i++)
+    for (unsigned int i = 0; i < dataLength; i++)
     {
         // zero the content
         name[i] = 0;
     }
 
-    for (int i = 0; i < stdResult.length(); i++)
+    for (unsigned int i = 0; i < stdResult.length(); i++)
     {
         name[i] = stdResult[i];
     }
@@ -243,6 +160,8 @@ void MainWindow::on_newPushButton_clicked()
     }
     else
         firstInput = false;
+
+    this->isAnon = false;
 }
 
 void MainWindow::on_setStringsButton_clicked()
@@ -263,4 +182,123 @@ void MainWindow::on_setStringsButton_clicked()
     this->ui->dateAnonUI->setText(QString(this->dateString.c_str()));
 
     this->firstInput = false;
+}
+
+void MainWindow::on_anonPushButton_clicked()
+{
+    FileHandler aFileHandler;
+    if (this->dateString != "NONE" && this->nameString != "NONE")
+    {
+        if (fileSizeVector.empty())
+        {
+            QMessageBox aMessageBox;
+            aMessageBox.setText("No files opened!");
+            aMessageBox.exec();
+        }
+        if (this->dateString.length() > this->dateLength)
+        {
+            std::cout << "DateString too long!" << std::endl;
+            return;
+        }
+
+        if (this->nameString.length() > this->nameLength)
+        {
+            std::cout << "NameString too long!";
+            return;
+        }
+
+        for (unsigned int i = 0; i < fileSizeVector.size(); i++)
+        {
+            char* filePointer = fileSizeVector[i].filePointer;
+            size_t size = fileSizeVector[i].size;
+            size_t dataLength = 0;
+            char* name = aFileHandler.SeekDicomTag(filePointer, 0x00100010, size, dataLength);
+            char* date = aFileHandler.SeekDicomTag(filePointer, 0x00100030, size, dataLength);
+
+            for (unsigned int i = 0; i < nameLength; i++)
+            {
+                // zero the content
+                name[i] = 0;
+            }
+
+            for (unsigned int i = 0; i < dateLength; i++)
+            {
+                date[i] = 0;
+            }
+
+            for (unsigned int i = 0; i < nameString.length(); i++)
+            {
+                name[i] = nameString[i];
+            }
+
+            for (unsigned int i = 0; i < dateString.length(); i++)
+            {
+                date[i] = dateString[i];
+            }
+        }
+
+        this->isAnon = true;
+
+    }
+    else
+    {
+        QMessageBox aMessageBox;
+        aMessageBox.setText("No anonymisation strings set!");
+        aMessageBox.exec();
+    }
+}
+
+void MainWindow::on_savePushButton_clicked()
+{
+    if (!this->isAnon)
+    {
+        // throw dialogue
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Data not anonymised!", "Continue anyway?",
+                                      QMessageBox::Yes|QMessageBox::No);
+
+        if (reply == QMessageBox::No)
+            return;
+    }
+    if (this->ui->radioFolder)
+    {
+        QString folderName = QFileDialog::getExistingDirectory(this, "Save Directory",
+                                                           "/home",
+                                                           QFileDialog::ShowDirsOnly
+                                                           | QFileDialog::DontResolveSymlinks);
+
+        for (int p = 0; p < listOfDirs.size(); p++)
+        {
+            std::string newSubDir = folderName.toStdString() + this->listOfDirs[p].toStdString();
+
+            if (!isDirExist(newSubDir))
+            {
+                makePath(newSubDir);
+            }
+        }
+
+        FileHandler aFileHandler;
+        for (unsigned int i = 0; i < this->fileSizeVector.size(); i++)
+        {
+            std::string newFilename = folderName.toStdString() + OSSeperator + fileSizeVector[i].filename;
+            size_t size = fileSizeVector[i].size;
+            char* filePointer = fileSizeVector[i].filePointer;
+
+            aFileHandler.writeFileFromBinary(newFilename, size, filePointer);
+        }
+
+
+    }
+}
+
+void MainWindow::on_openFolderPushButton_clicked()
+{
+    on_actionOpen_Folder_triggered();
+}
+
+void MainWindow::on_closeFilePushbutton_clicked()
+{
+    for (unsigned int i = 0; i < fileSizeVector.size(); i++)
+        delete [] fileSizeVector[i].filePointer;
+    fileSizeVector.clear();
 }

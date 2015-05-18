@@ -18,16 +18,19 @@ FileHandler::FileHandler()
 {
 }
 
-std::vector<FileSizeTuple> FileHandler::getFileSizeVector(QWidget* caller)
+std::vector<FileSizeTuple> FileHandler::getFileSizeVector(QWidget* caller, QString& folderName, QStringList& listOfDirs)
 {
-    QString folderName = QFileDialog::getExistingDirectory(caller, "Open Directory",
+    folderName = QFileDialog::getExistingDirectory(caller, "Open Directory",
                                                            "/home",
                                                            QFileDialog::ShowDirsOnly
                                                            | QFileDialog::DontResolveSymlinks);
 
-    QStringList listOfFiles;
-    QStringList listOfDirs;
+    std::vector<FileSizeTuple> aFileSizeVector;
 
+    if (folderName.isNull())
+        return aFileSizeVector;
+
+    QStringList listOfFiles;
     QDirIterator it(folderName, QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
     while (it.hasNext())
     {
@@ -45,16 +48,13 @@ std::vector<FileSizeTuple> FileHandler::getFileSizeVector(QWidget* caller)
         std::cout << listOfDirs[i].toStdString() << std::endl;
     }
 
-    std::vector<FileSizeTuple> aFileSizeVector;
+
 
 
     FileHandler aFileHandler;
 
-    std::vector<std::string> aStringVector;
-
-
     // let's do a hack for now (need to strip the .. and .)
-    for (int i = 0; i < listOfFiles.length(); i++)
+    for (int i = 0; i < listOfFiles.size(); i++)
     {
         size_t size = 0;
         if (!listOfFiles[i].endsWith("."))
@@ -76,6 +76,8 @@ std::vector<FileSizeTuple> FileHandler::getFileSizeVector(QWidget* caller)
             }
         }
     }
+
+    return aFileSizeVector;
 }
 
 char* FileHandler::SeekDicomTag(char* memoryBlock, unsigned int tag, size_t length, size_t& oDataLength)
@@ -139,8 +141,6 @@ char* FileHandler::getFileAsBinary(std::string iFilename, size_t& length)
         file.seekg(0, std::ios::beg);
         file.read(memoryBlock, size);
         file.close();
-
-        qDebug() << "File read in binary";
     }
     else
         qDebug() << "Open file failed";

@@ -5,6 +5,8 @@
 
 #include <string>
 
+#include <filehandler.h>
+
 namespace Ui {
 class MainWindow;
 }
@@ -28,11 +30,24 @@ private slots:
 
     void on_setStringsButton_clicked();
 
+    void on_anonPushButton_clicked();
+
+    void on_savePushButton_clicked();
+
+    void on_openFolderPushButton_clicked();
+
+    void on_closeFilePushbutton_clicked();
+
 private:
     Ui::MainWindow *ui;
     bool firstInput;
+    bool isAnon;
     std::string nameString;
     std::string dateString;
+    std::vector<FileSizeTuple> fileSizeVector;
+    size_t nameLength;
+    size_t dateLength;
+    QStringList listOfDirs;
 };
 
 #endif // MAINWINDOW_H

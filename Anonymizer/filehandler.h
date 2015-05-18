@@ -10,6 +10,7 @@
 struct FileSizeTuple
 {
     FileSizeTuple() { filePointer = 0; size = 0; }
+    ~FileSizeTuple() { }
     std::string filename;
     char* filePointer;
     size_t size;
@@ -23,7 +24,7 @@ public:
     char* getFileAsBinary(std::string iFilename, size_t& length);
     char* SeekDicomTag(char* memoryBlock, unsigned int tag, size_t length, size_t& oLength);
     char* writeFileFromBinary(std::string iFilename, size_t length, char* binaryFile);
-    std::vector<FileSizeTuple> getFileSizeVector(QWidget* caller);
+    std::vector<FileSizeTuple> getFileSizeVector(QWidget* caller, QString& folderName, QStringList& listOfDirs);
 };
 
 

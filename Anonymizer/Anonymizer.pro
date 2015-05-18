@@ -14,11 +14,9 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    Anonymizer.cpp \
     filehandler.cpp
 
 HEADERS  += mainwindow.h \
-    Anonymizer.h \
     filehandler.h \
     DirMaker.h
 
