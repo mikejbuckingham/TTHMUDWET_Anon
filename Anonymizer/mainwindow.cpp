@@ -87,47 +87,43 @@ void MainWindow::on_actionOpen_Folder_triggered()
 
 void MainWindow::on_action_Open_triggered()
 {
-    QString filename = QFileDialog::getOpenFileName(this, "Open File");
+    QString absoluteFilename;
+    QFileDialog aQFileDialog;
+    absoluteFilename = aQFileDialog.getOpenFileName(this, "Open File");
+
+    QString filename = absoluteFilename;
+
+    QFileInfo aFileInfo(filename);
+
+    QString filenameFinal = filename.remove(aFileInfo.absoluteDir().absolutePath() + "/");
+
+    std::cout << "Filename: " << filenameFinal.toStdString() << std::endl;
+    if (filename.isNull())
+        return;
+
+
     FileHandler aFileHandler;
     size_t size = 0;
-    char* memoryBlock = aFileHandler.getFileAsBinary(filename.toStdString(), size);
+    char* filePointer = aFileHandler.getFileAsBinary(absoluteFilename.toStdString(), size);
 
-    if (!memoryBlock)
+    if (!filePointer)
     {
         std::cout << "Couldn't open file: " << filename.toStdString() << std::endl;
         return;
     }
+    FileSizeTuple aFileSizeTuple;
+    aFileSizeTuple.filePointer = filePointer;
+    aFileSizeTuple.size = size;
+    aFileSizeTuple.filename = filename.toStdString();
+    fileSizeVector.push_back(aFileSizeTuple);
 
-    // search for dicom tag (hardcoded to patient name)
     size_t dataLength = 0;
-    char* name = aFileHandler.SeekDicomTag(memoryBlock, 0x00100010, size, dataLength);
 
-    QString result = QInputDialog::getText(0, "Change name", "Value:");
+    aFileHandler.SeekDicomTag(filePointer, 0x00100010, size, dataLength);
+    this->nameLength = dataLength;
 
-    std::string stdResult = result.toStdString();
-
-    // write out name
-
-    if (stdResult.length() > dataLength)
-    {
-        std::cout << "Error : Cannot fit";
-    }
-
-    for (unsigned int i = 0; i < dataLength; i++)
-    {
-        // zero the content
-        name[i] = 0;
-    }
-
-    for (unsigned int i = 0; i < stdResult.length(); i++)
-    {
-        name[i] = stdResult[i];
-    }
-
-    std::string newFileName = filename.toStdString() + "_Anon";
-    aFileHandler.writeFileFromBinary(newFileName, size, memoryBlock);
-
-    delete memoryBlock;
+    aFileHandler.SeekDicomTag(filePointer, 0x00100030, size, dataLength);
+    this->dateLength = dataLength;
 }
 
 void MainWindow::on_actionClose_triggered()
@@ -139,8 +135,9 @@ void MainWindow::on_newPushButton_clicked()
 {
     // if we have already opened at least one file this session,
     // we need to prompt
+    on_closeFilePushbutton_clicked();
 
-    if (!firstInput)
+    if (!firstInput && this->nameString != "NONE" && this->dateString != "NONE")
     {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this, "New Session?", "Keep anonymisation key?",
@@ -250,6 +247,13 @@ void MainWindow::on_anonPushButton_clicked()
 
 void MainWindow::on_savePushButton_clicked()
 {
+    if (fileSizeVector.empty())
+    {
+        QMessageBox aMessageBox;
+        aMessageBox.setText("No data loaded!");
+        aMessageBox.exec();
+        return;
+    }
     if (!this->isAnon)
     {
         // throw dialogue
@@ -301,4 +305,9 @@ void MainWindow::on_closeFilePushbutton_clicked()
     for (unsigned int i = 0; i < fileSizeVector.size(); i++)
         delete [] fileSizeVector[i].filePointer;
     fileSizeVector.clear();
+}
+
+void MainWindow::on_openFilePushButton_clicked()
+{
+    on_action_Open_triggered();
 }

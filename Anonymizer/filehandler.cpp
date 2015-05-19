@@ -152,7 +152,6 @@ char* FileHandler::getFileAsBinary(std::string iFilename, size_t& length)
 char* FileHandler::writeFileFromBinary(std::string iFilename, size_t length, char* binaryFile)
 {
     char* result = NULL;
-    std::streampos size;
     std::ofstream file;
 
 

@@ -38,6 +38,8 @@ private slots:
 
     void on_closeFilePushbutton_clicked();
 
+    void on_openFilePushButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     bool firstInput;
