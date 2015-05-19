@@ -18,6 +18,9 @@
 
 #include <DirMaker.h>
 
+#include <quazip/quazip.h>
+#include <quazip/quazipfile.h>
+
 const std::string OSSeperator = "/";
 std::string newFolderName = "Anon";
 
@@ -264,7 +267,7 @@ void MainWindow::on_savePushButton_clicked()
         if (reply == QMessageBox::No)
             return;
     }
-    if (this->ui->radioFolder)
+    if (this->ui->radioFolder->isChecked())
     {
         QString folderName = QFileDialog::getExistingDirectory(this, "Save Directory",
                                                            "/home",
@@ -292,6 +295,32 @@ void MainWindow::on_savePushButton_clicked()
         }
 
 
+    }
+    else if (this->ui->radioZip->isChecked())
+    {
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                   "/home",
+                                   tr("Zip (*.zip)"));
+
+        std::cout << fileName.toStdString() << std::endl;
+
+        QFileInfo aFileInfo(fileName);
+
+        fileName.remove(aFileInfo.absoluteDir().absolutePath() + "/");
+
+        QuaZip* aQuaZip = new QuaZip(fileName);
+        aQuaZip->open(QuaZip::mdCreate);
+
+        for (unsigned int i = 0; i < fileSizeVector.size(); i++)
+        {
+            QuaZipFile file(aQuaZip);
+            file.open(QIODevice::WriteOnly, QuaZipNewInfo(fileSizeVector[i].filename.c_str()));
+
+            file.write(fileSizeVector[i].filePointer, fileSizeVector[i].size);
+
+            file.close();
+        }
+        aQuaZip->close();
     }
 }
 
