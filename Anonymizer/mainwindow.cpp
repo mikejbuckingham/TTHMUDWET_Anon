@@ -322,7 +322,16 @@ void MainWindow::doStuff()
     {
 
         QuaZipFile file(aQuaZip);
-        QuaZipNewInfo newFileInfo(fileSizeVector[i].filename.c_str());
+
+        std::string finalName = fileSizeVector[i].filename.c_str();
+
+        // Strip the first character, if it starts with /
+        if (finalName.c_str()[0] == '/')
+        {
+            finalName = &finalName.c_str()[1];
+        }
+
+        QuaZipNewInfo newFileInfo(finalName.c_str());
         newFileInfo.setPermissions(QFile::ReadOwner | QFile::WriteOwner | QFile::ReadOther | QFile::ReadGroup);
 
         file.open(QIODevice::WriteOnly, newFileInfo);
