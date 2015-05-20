@@ -326,9 +326,11 @@ void MainWindow::doStuff()
 
     QFileInfo aFileInfo(fileName);
 
+    QString fullFileName = fileName;
+
     fileName.remove(aFileInfo.absoluteDir().absolutePath() + "/");
 
-    QuaZip* aQuaZip = new QuaZip(fileName);
+    QuaZip* aQuaZip = new QuaZip(fullFileName);
     //aQuaZip->setZip64Enabled(true);
     aQuaZip->open(QuaZip::mdCreate);
 
