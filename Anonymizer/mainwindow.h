@@ -51,6 +51,7 @@ private:
     size_t nameLength;
     size_t dateLength;
     QStringList listOfDirs;
+    bool doNotClose;
 };
 
 #endif // MAINWINDOW_H

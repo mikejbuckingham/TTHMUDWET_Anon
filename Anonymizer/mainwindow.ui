@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>451</width>
+    <height>338</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -79,52 +79,13 @@
      <string>NONE</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="setStringsButton">
-    <property name="geometry">
-     <rect>
-      <x>280</x>
-      <y>110</y>
-      <width>92</width>
-      <height>29</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Set strings</string>
-    </property>
-   </widget>
-   <widget class="QWidget" name="">
-    <property name="geometry">
-     <rect>
-      <x>130</x>
-      <y>200</y>
-      <width>131</width>
-      <height>28</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QRadioButton" name="radioFolder">
-       <property name="text">
-        <string>Folder</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="radioZip">
-       <property name="text">
-        <string>Zip</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>20</x>
       <y>20</y>
       <width>102</width>
-      <height>208</height>
+      <height>243</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -145,6 +106,27 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="setStringsButton">
+         <property name="text">
+          <string>Set strings</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="anonPushButton">
+         <property name="text">
+          <string>Anonymise</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="savePushButton">
+         <property name="text">
+          <string>Save</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="openFilePushButton">
          <property name="text">
           <string>Open File</string>
@@ -158,31 +140,119 @@
          </property>
         </widget>
        </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QLabel" name="currentFileConst">
+    <property name="geometry">
+     <rect>
+      <x>151</x>
+      <y>191</y>
+      <width>84</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Current File :</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="currentFileValue">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>210</y>
+      <width>291</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>NONE</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>130</y>
+      <width>141</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Is data anonymised?</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="isDataAnonValue">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>130</y>
+      <width>65</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>No</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>160</y>
+      <width>238</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QPushButton" name="anonPushButton">
+        <widget class="QRadioButton" name="radioFolder">
          <property name="text">
-          <string>Anonymise</string>
+          <string>Folder</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="radioZip">
+         <property name="text">
+          <string>Zip</string>
          </property>
         </widget>
        </item>
       </layout>
      </item>
      <item>
-      <widget class="QPushButton" name="savePushButton">
-       <property name="text">
-        <string>Save</string>
+      <widget class="QProgressBar" name="progressBar">
+       <property name="value">
+        <number>0</number>
        </property>
       </widget>
      </item>
     </layout>
    </widget>
+   <zorder>label</zorder>
+   <zorder>label_2</zorder>
+   <zorder>label_3</zorder>
+   <zorder>nameAnonUI</zorder>
+   <zorder>dateAnonUI</zorder>
+   <zorder>layoutWidget</zorder>
+   <zorder>layoutWidget</zorder>
+   <zorder>radioFolder</zorder>
+   <zorder>progressBar</zorder>
+   <zorder>currentFileConst</zorder>
+   <zorder>currentFileValue</zorder>
+   <zorder>label_4</zorder>
+   <zorder>isDataAnonValue</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
+     <width>451</width>
      <height>27</height>
     </rect>
    </property>

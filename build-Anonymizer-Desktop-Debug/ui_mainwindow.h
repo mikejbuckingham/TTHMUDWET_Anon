@@ -19,6 +19,7 @@
 #include <QtGui/QMainWindow>
 #include <QtGui/QMenu>
 #include <QtGui/QMenuBar>
+#include <QtGui/QProgressBar>
 #include <QtGui/QPushButton>
 #include <QtGui/QRadioButton>
 #include <QtGui/QStatusBar>
@@ -41,20 +42,26 @@ public:
     QLabel *label_3;
     QLabel *nameAnonUI;
     QLabel *dateAnonUI;
-    QPushButton *setStringsButton;
-    QWidget *widget;
-    QHBoxLayout *horizontalLayout;
-    QRadioButton *radioFolder;
-    QRadioButton *radioZip;
-    QWidget *widget1;
+    QWidget *layoutWidget;
     QVBoxLayout *verticalLayout_2;
     QVBoxLayout *verticalLayout;
     QPushButton *newPushButton;
     QPushButton *openFolderPushButton;
-    QPushButton *openFilePushButton;
-    QPushButton *closeFilePushbutton;
+    QPushButton *setStringsButton;
     QPushButton *anonPushButton;
     QPushButton *savePushButton;
+    QPushButton *openFilePushButton;
+    QPushButton *closeFilePushbutton;
+    QLabel *currentFileConst;
+    QLabel *currentFileValue;
+    QLabel *label_4;
+    QLabel *isDataAnonValue;
+    QWidget *widget;
+    QHBoxLayout *horizontalLayout_2;
+    QHBoxLayout *horizontalLayout;
+    QRadioButton *radioFolder;
+    QRadioButton *radioZip;
+    QProgressBar *progressBar;
     QMenuBar *menuBar;
     QMenu *menu_About;
     QMenu *menuMusic_Tool;
@@ -65,7 +72,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
-        MainWindow->resize(400, 300);
+        MainWindow->resize(451, 338);
         action_Open = new QAction(MainWindow);
         action_Open->setObjectName(QString::fromUtf8("action_Open"));
         action_About = new QAction(MainWindow);
@@ -91,17 +98,78 @@ public:
         dateAnonUI = new QLabel(centralWidget);
         dateAnonUI->setObjectName(QString::fromUtf8("dateAnonUI"));
         dateAnonUI->setGeometry(QRect(247, 79, 141, 21));
-        setStringsButton = new QPushButton(centralWidget);
+        layoutWidget = new QWidget(centralWidget);
+        layoutWidget->setObjectName(QString::fromUtf8("layoutWidget"));
+        layoutWidget->setGeometry(QRect(20, 20, 102, 243));
+        verticalLayout_2 = new QVBoxLayout(layoutWidget);
+        verticalLayout_2->setSpacing(6);
+        verticalLayout_2->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
+        verticalLayout_2->setContentsMargins(0, 0, 0, 0);
+        verticalLayout = new QVBoxLayout();
+        verticalLayout->setSpacing(6);
+        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+        newPushButton = new QPushButton(layoutWidget);
+        newPushButton->setObjectName(QString::fromUtf8("newPushButton"));
+
+        verticalLayout->addWidget(newPushButton);
+
+        openFolderPushButton = new QPushButton(layoutWidget);
+        openFolderPushButton->setObjectName(QString::fromUtf8("openFolderPushButton"));
+
+        verticalLayout->addWidget(openFolderPushButton);
+
+        setStringsButton = new QPushButton(layoutWidget);
         setStringsButton->setObjectName(QString::fromUtf8("setStringsButton"));
-        setStringsButton->setGeometry(QRect(280, 110, 92, 29));
+
+        verticalLayout->addWidget(setStringsButton);
+
+        anonPushButton = new QPushButton(layoutWidget);
+        anonPushButton->setObjectName(QString::fromUtf8("anonPushButton"));
+
+        verticalLayout->addWidget(anonPushButton);
+
+        savePushButton = new QPushButton(layoutWidget);
+        savePushButton->setObjectName(QString::fromUtf8("savePushButton"));
+
+        verticalLayout->addWidget(savePushButton);
+
+        openFilePushButton = new QPushButton(layoutWidget);
+        openFilePushButton->setObjectName(QString::fromUtf8("openFilePushButton"));
+
+        verticalLayout->addWidget(openFilePushButton);
+
+        closeFilePushbutton = new QPushButton(layoutWidget);
+        closeFilePushbutton->setObjectName(QString::fromUtf8("closeFilePushbutton"));
+
+        verticalLayout->addWidget(closeFilePushbutton);
+
+
+        verticalLayout_2->addLayout(verticalLayout);
+
+        currentFileConst = new QLabel(centralWidget);
+        currentFileConst->setObjectName(QString::fromUtf8("currentFileConst"));
+        currentFileConst->setGeometry(QRect(151, 191, 84, 21));
+        currentFileValue = new QLabel(centralWidget);
+        currentFileValue->setObjectName(QString::fromUtf8("currentFileValue"));
+        currentFileValue->setGeometry(QRect(150, 210, 291, 51));
+        label_4 = new QLabel(centralWidget);
+        label_4->setObjectName(QString::fromUtf8("label_4"));
+        label_4->setGeometry(QRect(140, 130, 141, 21));
+        isDataAnonValue = new QLabel(centralWidget);
+        isDataAnonValue->setObjectName(QString::fromUtf8("isDataAnonValue"));
+        isDataAnonValue->setGeometry(QRect(300, 130, 65, 21));
         widget = new QWidget(centralWidget);
         widget->setObjectName(QString::fromUtf8("widget"));
-        widget->setGeometry(QRect(130, 200, 131, 28));
-        horizontalLayout = new QHBoxLayout(widget);
+        widget->setGeometry(QRect(130, 160, 238, 31));
+        horizontalLayout_2 = new QHBoxLayout(widget);
+        horizontalLayout_2->setSpacing(6);
+        horizontalLayout_2->setContentsMargins(11, 11, 11, 11);
+        horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
+        horizontalLayout_2->setContentsMargins(0, 0, 0, 0);
+        horizontalLayout = new QHBoxLayout();
         horizontalLayout->setSpacing(6);
-        horizontalLayout->setContentsMargins(11, 11, 11, 11);
         horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
-        horizontalLayout->setContentsMargins(0, 0, 0, 0);
         radioFolder = new QRadioButton(widget);
         radioFolder->setObjectName(QString::fromUtf8("radioFolder"));
 
@@ -112,54 +180,32 @@ public:
 
         horizontalLayout->addWidget(radioZip);
 
-        widget1 = new QWidget(centralWidget);
-        widget1->setObjectName(QString::fromUtf8("widget1"));
-        widget1->setGeometry(QRect(20, 20, 102, 208));
-        verticalLayout_2 = new QVBoxLayout(widget1);
-        verticalLayout_2->setSpacing(6);
-        verticalLayout_2->setContentsMargins(11, 11, 11, 11);
-        verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
-        verticalLayout_2->setContentsMargins(0, 0, 0, 0);
-        verticalLayout = new QVBoxLayout();
-        verticalLayout->setSpacing(6);
-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-        newPushButton = new QPushButton(widget1);
-        newPushButton->setObjectName(QString::fromUtf8("newPushButton"));
 
-        verticalLayout->addWidget(newPushButton);
+        horizontalLayout_2->addLayout(horizontalLayout);
 
-        openFolderPushButton = new QPushButton(widget1);
-        openFolderPushButton->setObjectName(QString::fromUtf8("openFolderPushButton"));
+        progressBar = new QProgressBar(widget);
+        progressBar->setObjectName(QString::fromUtf8("progressBar"));
+        progressBar->setValue(0);
 
-        verticalLayout->addWidget(openFolderPushButton);
-
-        openFilePushButton = new QPushButton(widget1);
-        openFilePushButton->setObjectName(QString::fromUtf8("openFilePushButton"));
-
-        verticalLayout->addWidget(openFilePushButton);
-
-        closeFilePushbutton = new QPushButton(widget1);
-        closeFilePushbutton->setObjectName(QString::fromUtf8("closeFilePushbutton"));
-
-        verticalLayout->addWidget(closeFilePushbutton);
-
-        anonPushButton = new QPushButton(widget1);
-        anonPushButton->setObjectName(QString::fromUtf8("anonPushButton"));
-
-        verticalLayout->addWidget(anonPushButton);
-
-
-        verticalLayout_2->addLayout(verticalLayout);
-
-        savePushButton = new QPushButton(widget1);
-        savePushButton->setObjectName(QString::fromUtf8("savePushButton"));
-
-        verticalLayout_2->addWidget(savePushButton);
+        horizontalLayout_2->addWidget(progressBar);
 
         MainWindow->setCentralWidget(centralWidget);
+        label->raise();
+        label_2->raise();
+        label_3->raise();
+        nameAnonUI->raise();
+        dateAnonUI->raise();
+        layoutWidget->raise();
+        layoutWidget->raise();
+        radioFolder->raise();
+        progressBar->raise();
+        currentFileConst->raise();
+        currentFileValue->raise();
+        label_4->raise();
+        isDataAnonValue->raise();
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 400, 27));
+        menuBar->setGeometry(QRect(0, 0, 451, 27));
         menu_About = new QMenu(menuBar);
         menu_About->setObjectName(QString::fromUtf8("menu_About"));
         menuMusic_Tool = new QMenu(menuBar);
@@ -196,15 +242,19 @@ public:
         label_3->setText(QApplication::translate("MainWindow", "Birthdate :", 0, QApplication::UnicodeUTF8));
         nameAnonUI->setText(QApplication::translate("MainWindow", "NONE", 0, QApplication::UnicodeUTF8));
         dateAnonUI->setText(QApplication::translate("MainWindow", "NONE", 0, QApplication::UnicodeUTF8));
-        setStringsButton->setText(QApplication::translate("MainWindow", "Set strings", 0, QApplication::UnicodeUTF8));
-        radioFolder->setText(QApplication::translate("MainWindow", "Folder", 0, QApplication::UnicodeUTF8));
-        radioZip->setText(QApplication::translate("MainWindow", "Zip", 0, QApplication::UnicodeUTF8));
         newPushButton->setText(QApplication::translate("MainWindow", "New", 0, QApplication::UnicodeUTF8));
         openFolderPushButton->setText(QApplication::translate("MainWindow", "Open Folder", 0, QApplication::UnicodeUTF8));
-        openFilePushButton->setText(QApplication::translate("MainWindow", "Open File", 0, QApplication::UnicodeUTF8));
-        closeFilePushbutton->setText(QApplication::translate("MainWindow", "Close File", 0, QApplication::UnicodeUTF8));
+        setStringsButton->setText(QApplication::translate("MainWindow", "Set strings", 0, QApplication::UnicodeUTF8));
         anonPushButton->setText(QApplication::translate("MainWindow", "Anonymise", 0, QApplication::UnicodeUTF8));
         savePushButton->setText(QApplication::translate("MainWindow", "Save", 0, QApplication::UnicodeUTF8));
+        openFilePushButton->setText(QApplication::translate("MainWindow", "Open File", 0, QApplication::UnicodeUTF8));
+        closeFilePushbutton->setText(QApplication::translate("MainWindow", "Close File", 0, QApplication::UnicodeUTF8));
+        currentFileConst->setText(QApplication::translate("MainWindow", "Current File :", 0, QApplication::UnicodeUTF8));
+        currentFileValue->setText(QApplication::translate("MainWindow", "NONE", 0, QApplication::UnicodeUTF8));
+        label_4->setText(QApplication::translate("MainWindow", "Is data anonymised?", 0, QApplication::UnicodeUTF8));
+        isDataAnonValue->setText(QApplication::translate("MainWindow", "No", 0, QApplication::UnicodeUTF8));
+        radioFolder->setText(QApplication::translate("MainWindow", "Folder", 0, QApplication::UnicodeUTF8));
+        radioZip->setText(QApplication::translate("MainWindow", "Zip", 0, QApplication::UnicodeUTF8));
         menu_About->setTitle(QApplication::translate("MainWindow", "&Help", 0, QApplication::UnicodeUTF8));
         menuMusic_Tool->setTitle(QApplication::translate("MainWindow", "&File", 0, QApplication::UnicodeUTF8));
     } // retranslateUi

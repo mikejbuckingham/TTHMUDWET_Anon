@@ -39,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->nameString = "NONE";
     this->nameLength = 0;
     this->dateLength = 0;
+    this->doNotClose = false;
 }
 
 MainWindow::~MainWindow()
@@ -85,6 +86,8 @@ void MainWindow::on_actionOpen_Folder_triggered()
 
     aFileHandler.SeekDicomTag(filePointer, 0x00100030, size, dataLength);
     this->dateLength = dataLength;
+
+    this->ui->currentFileValue->setText(folderName);
 
 }
 
@@ -238,6 +241,7 @@ void MainWindow::on_anonPushButton_clicked()
         }
 
         this->isAnon = true;
+        this->ui->isDataAnonValue->setText("Yes");
 
     }
     else
@@ -285,6 +289,8 @@ void MainWindow::on_savePushButton_clicked()
         }
 
         FileHandler aFileHandler;
+        unsigned int tick = fileSizeVector.size() / 100;
+        unsigned int progressValue = 0;
         for (unsigned int i = 0; i < this->fileSizeVector.size(); i++)
         {
             std::string newFilename = folderName.toStdString() + OSSeperator + fileSizeVector[i].filename;
@@ -292,6 +298,14 @@ void MainWindow::on_savePushButton_clicked()
             char* filePointer = fileSizeVector[i].filePointer;
 
             aFileHandler.writeFileFromBinary(newFilename, size, filePointer);
+
+            if (!(i % tick))
+            {
+                // bump progress
+                ++progressValue;
+            }
+
+            this->ui->progressBar->setValue(progressValue);
         }
 
 
@@ -318,6 +332,11 @@ void MainWindow::doStuff()
     //aQuaZip->setZip64Enabled(true);
     aQuaZip->open(QuaZip::mdCreate);
 
+    unsigned int tick = fileSizeVector.size() / 100;
+    unsigned int progressValue = 0;
+
+    this->doNotClose = true;
+
     for (unsigned int i = 0; i < fileSizeVector.size(); i++)
     {
 
@@ -338,14 +357,22 @@ void MainWindow::doStuff()
 
         file.write(fileSizeVector[i].filePointer, fileSizeVector[i].size);
 
-        std::cout << "First error :" << file.getZipError() << std::endl;
+
 
         file.close();
 
-        std::cout << "Second error :" << file.getZipError() << std::endl;
+        if (!(i % tick))
+        {
+            // bump progress
+            ++progressValue;
+        }
+
+        this->ui->progressBar->setValue(progressValue);
+
     }
-    std::cout << "Final error :" << aQuaZip->getZipError() << std::endl;
+    std::cout << "Finished!" << std::endl;
     aQuaZip->close();
+    this->doNotClose = false;
 }
 
 void MainWindow::on_openFolderPushButton_clicked()
@@ -355,9 +382,22 @@ void MainWindow::on_openFolderPushButton_clicked()
 
 void MainWindow::on_closeFilePushbutton_clicked()
 {
+    if (this->doNotClose)
+    {
+        QMessageBox aMessageBox;
+        aMessageBox.setText("Please wait until saving process has finished!");
+        aMessageBox.exec();
+        return;
+    }
+
+
     for (unsigned int i = 0; i < fileSizeVector.size(); i++)
         delete [] fileSizeVector[i].filePointer;
     fileSizeVector.clear();
+
+    this->ui->currentFileValue->setText("NONE");
+    this->ui->progressBar->setValue(0);
+    this->ui->isDataAnonValue->setText("No");
 }
 
 void MainWindow::on_openFilePushButton_clicked()
