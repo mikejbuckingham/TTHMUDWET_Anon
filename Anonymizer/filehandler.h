@@ -7,6 +7,8 @@
 #include <vector>
 #include <QWidget>
 
+
+
 struct FileSizeTuple
 {
     FileSizeTuple() { filePointer = 0; size = 0; }

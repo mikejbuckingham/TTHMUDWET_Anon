@@ -298,30 +298,45 @@ void MainWindow::on_savePushButton_clicked()
     }
     else if (this->ui->radioZip->isChecked())
     {
-        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
-                                   "/home",
-                                   tr("Zip (*.zip)"));
-
-        std::cout << fileName.toStdString() << std::endl;
-
-        QFileInfo aFileInfo(fileName);
-
-        fileName.remove(aFileInfo.absoluteDir().absolutePath() + "/");
-
-        QuaZip* aQuaZip = new QuaZip(fileName);
-        aQuaZip->open(QuaZip::mdCreate);
-
-        for (unsigned int i = 0; i < fileSizeVector.size(); i++)
-        {
-            QuaZipFile file(aQuaZip);
-            file.open(QIODevice::WriteOnly, QuaZipNewInfo(fileSizeVector[i].filename.c_str()));
-
-            file.write(fileSizeVector[i].filePointer, fileSizeVector[i].size);
-
-            file.close();
-        }
-        aQuaZip->close();
+        doStuff();
     }
+}
+
+void MainWindow::doStuff()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+                               "/home",
+                               tr("Zip (*.zip)"));
+
+    std::cout << fileName.toStdString() << std::endl;
+
+    QFileInfo aFileInfo(fileName);
+
+    fileName.remove(aFileInfo.absoluteDir().absolutePath() + "/");
+
+    QuaZip* aQuaZip = new QuaZip(fileName);
+    //aQuaZip->setZip64Enabled(true);
+    aQuaZip->open(QuaZip::mdCreate);
+
+    for (unsigned int i = 0; i < fileSizeVector.size(); i++)
+    {
+
+        QuaZipFile file(aQuaZip);
+        QuaZipNewInfo newFileInfo(fileSizeVector[i].filename.c_str());
+        newFileInfo.setPermissions(QFile::ReadOwner | QFile::WriteOwner | QFile::ReadOther | QFile::ReadGroup);
+
+        file.open(QIODevice::WriteOnly, newFileInfo);
+
+        file.write(fileSizeVector[i].filePointer, fileSizeVector[i].size);
+
+        std::cout << "First error :" << file.getZipError() << std::endl;
+
+        file.close();
+
+        std::cout << "Second error :" << file.getZipError() << std::endl;
+    }
+    std::cout << "Final error :" << aQuaZip->getZipError() << std::endl;
+    aQuaZip->close();
 }
 
 void MainWindow::on_openFolderPushButton_clicked()
