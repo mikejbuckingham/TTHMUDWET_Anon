@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>451</width>
-    <height>338</height>
+    <width>420</width>
+    <height>381</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -196,33 +196,48 @@
      <string>No</string>
     </property>
    </widget>
+   <widget class="QRadioButton" name="radioZip">
+    <property name="geometry">
+     <rect>
+      <x>211</x>
+      <y>162</y>
+      <width>50</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Zip</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioFolder">
+    <property name="geometry">
+     <rect>
+      <x>132</x>
+      <y>162</y>
+      <width>73</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Folder</string>
+    </property>
+   </widget>
    <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
-      <x>130</x>
-      <y>160</y>
-      <width>238</width>
+      <x>31</x>
+      <y>281</y>
+      <width>371</width>
       <height>31</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QRadioButton" name="radioFolder">
-         <property name="text">
-          <string>Folder</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QRadioButton" name="radioZip">
-         <property name="text">
-          <string>Zip</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <widget class="QLabel" name="SaveOpenText">
+       <property name="text">
+        <string>Opening...</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QProgressBar" name="progressBar">
@@ -240,19 +255,19 @@
    <zorder>dateAnonUI</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>layoutWidget</zorder>
-   <zorder>radioFolder</zorder>
-   <zorder>progressBar</zorder>
    <zorder>currentFileConst</zorder>
    <zorder>currentFileValue</zorder>
    <zorder>label_4</zorder>
    <zorder>isDataAnonValue</zorder>
+   <zorder>progressBar</zorder>
+   <zorder>SaveOpenText</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>451</width>
+     <width>420</width>
      <height>27</height>
     </rect>
    </property>

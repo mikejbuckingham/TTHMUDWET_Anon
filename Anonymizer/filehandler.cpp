@@ -27,17 +27,17 @@ FileHandler::~FileHandler()
 
 }
 
-std::vector<FileSizeTuple> FileHandler::getFileSizeVector(QWidget* caller, QString& folderName, QStringList& listOfDirs)
+std::vector<FileSizeTuple>* FileHandler::getFileSizeVector(QWidget* caller, QString& folderName, QStringList& listOfDirs)
 {
-    folderName = QFileDialog::getExistingDirectory(caller, "Open Directory",
-                                                           "/home",
-                                                           QFileDialog::ShowDirsOnly
-                                                           | QFileDialog::DontResolveSymlinks);
-
-    std::vector<FileSizeTuple> aFileSizeVector;
-
     if (folderName.isNull())
-        return aFileSizeVector;
+    {
+        emit finished(false);
+        return NULL;
+    }
+
+    std::vector<FileSizeTuple>* aFileSizeVector = new std::vector<FileSizeTuple>;
+
+
 
     QStringList listOfFiles;
     QDirIterator it(folderName, QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
@@ -54,6 +54,10 @@ std::vector<FileSizeTuple> FileHandler::getFileSizeVector(QWidget* caller, QStri
 
     FileHandler aFileHandler;
 
+    double numbersOfFiles = listOfFiles.size();
+    double tick = 100.0f / numbersOfFiles;
+    double currentPercentage = 0;
+
     // let's do a hack for now (need to strip the .. and .)
     for (int i = 0; i < listOfFiles.size(); i++)
     {
@@ -67,7 +71,7 @@ std::vector<FileSizeTuple> FileHandler::getFileSizeVector(QWidget* caller, QStri
             aFileSizeTuple.size = size;
 
             if (aFileSizeTuple.filePointer)
-                aFileSizeVector.push_back(aFileSizeTuple);
+                aFileSizeVector->push_back(aFileSizeTuple);
             else
             {
                 std::cout << "ABORT ABORT ABORT" << std::endl;
@@ -76,6 +80,9 @@ std::vector<FileSizeTuple> FileHandler::getFileSizeVector(QWidget* caller, QStri
 
             }
         }
+
+        currentPercentage += tick;
+        emit percentageProcessed(currentPercentage);
     }
 
     return aFileSizeVector;
@@ -150,22 +157,22 @@ char* FileHandler::getFileAsBinary(std::string iFilename, size_t& length)
     return memoryBlock;
 }
 
-bool FileHandler::createZip(QString fullFileName, const std::vector<FileSizeTuple>& fileSizeVector)
+bool FileHandler::createZip(QString fullFileName, const std::vector<FileSizeTuple>* fileSizeVector)
 {
     QuaZip* aQuaZip = new QuaZip(fullFileName);
     //aQuaZip->setZip64Enabled(true);
     aQuaZip->open(QuaZip::mdCreate);
 
-    double numbersOfFiles = fileSizeVector.size();
+    double numbersOfFiles = fileSizeVector->size();
     double tick = 100.0f / numbersOfFiles;
     double currentPercentage = 0;
 
-    for (unsigned int i = 0; i < fileSizeVector.size(); i++)
+    for (unsigned int i = 0; i < fileSizeVector->size(); i++)
     {
 
         QuaZipFile file(aQuaZip);
 
-        std::string finalName = fileSizeVector[i].filename.c_str();
+        std::string finalName = (*fileSizeVector)[i].filename.c_str();
 
         // Strip the first character, if it starts with /
         if (finalName.c_str()[0] == '/')
@@ -185,7 +192,7 @@ bool FileHandler::createZip(QString fullFileName, const std::vector<FileSizeTupl
             return false;
         }
 
-        file.write(fileSizeVector[i].filePointer, fileSizeVector[i].size);
+        file.write((*fileSizeVector)[i].filePointer, (*fileSizeVector)[i].size);
 
         file.close();
 
@@ -195,23 +202,22 @@ bool FileHandler::createZip(QString fullFileName, const std::vector<FileSizeTupl
     }
     aQuaZip->close();
     delete aQuaZip;
-    std::cout << "Finished" << std::endl;
     emit finished(true);
     return true;
 }
 
-bool FileHandler::createFolder(QString folderName, std::vector<FileSizeTuple>& fileSizeVector)
+bool FileHandler::createFolder(QString folderName, std::vector<FileSizeTuple>* fileSizeVector)
 {
 
-    double numbersOfFiles = fileSizeVector.size();
+    double numbersOfFiles = fileSizeVector->size();
     double tick = 100.0f / numbersOfFiles;
     double currentPercentage = 0;
 
-    for (unsigned int i = 0; i < fileSizeVector.size(); i++)
+    for (unsigned int i = 0; i < fileSizeVector->size(); i++)
     {
-        std::string newFilename = folderName.toStdString() + OSSeperator + fileSizeVector[i].filename;
-        size_t size = fileSizeVector[i].size;
-        char* filePointer = fileSizeVector[i].filePointer;
+        std::string newFilename = folderName.toStdString() + OSSeperator + (*fileSizeVector)[i].filename;
+        size_t size = (*fileSizeVector)[i].size;
+        char* filePointer = (*fileSizeVector)[i].filePointer;
 
         writeFileFromBinary(newFilename, size, filePointer);
 

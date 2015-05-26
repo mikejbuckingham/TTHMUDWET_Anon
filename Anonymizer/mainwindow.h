@@ -6,6 +6,7 @@
 #include <string>
 
 #include <filehandler.h>
+#include <QFutureWatcher>
 
 namespace Ui {
 class MainWindow;
@@ -24,6 +25,7 @@ public:
 public slots:
     void updateProgress(double tick);
     void onComplete(bool);
+    void dataLoaded();
 
 private slots:
     void on_actionOpen_Folder_triggered();
@@ -52,11 +54,12 @@ private:
     bool isAnon;
     std::string nameString;
     std::string dateString;
-    std::vector<FileSizeTuple> fileSizeVector;
+    std::vector<FileSizeTuple>* fileSizeVector;
     size_t nameLength;
     size_t dateLength;
     QStringList listOfDirs;
     bool doNotClose;
+    QFutureWatcher<std::vector<FileSizeTuple>* > watcher;
 };
 
 #endif // MAINWINDOW_H

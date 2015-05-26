@@ -24,6 +24,7 @@
 #include <qtconcurrentrun.h>
 #include <QThread>
 
+
 std::string newFolderName = "Anon";
 
 
@@ -42,6 +43,9 @@ MainWindow::MainWindow(QWidget *parent) :
     this->nameLength = 0;
     this->dateLength = 0;
     this->doNotClose = false;
+    this->ui->progressBar->setVisible(false);
+    this->ui->SaveOpenText->setVisible(false);
+    this->fileSizeVector = 0;
 }
 
 MainWindow::~MainWindow()
@@ -52,10 +56,8 @@ MainWindow::~MainWindow()
 void MainWindow::on_actionOpen_Folder_triggered()
 {
     // Get all files and read them into memory
-    FileHandler aFileHandler;
-    QString folderName;
-
-    if (!fileSizeVector.empty())
+    // prompt to close if we already have a file
+    if (fileSizeVector && !fileSizeVector->empty())
     {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this, "File already open!", "Close current file?",
@@ -63,34 +65,35 @@ void MainWindow::on_actionOpen_Folder_triggered()
 
         if (reply == QMessageBox::Yes)
         {
-            for (unsigned int i = 0; i < fileSizeVector.size(); i++)
-                delete [] fileSizeVector[i].filePointer;
-
-            fileSizeVector.clear();
-
+            on_closeFilePushbutton_clicked();
         }
         else
             return;
     }
 
-    fileSizeVector = aFileHandler.getFileSizeVector(this, folderName, listOfDirs);
+    QString folderName = QFileDialog::getExistingDirectory(this, "Open Directory",
+                                                           "",
+                                                           QFileDialog::ShowDirsOnly
+                                                           | QFileDialog::DontResolveSymlinks);
 
-    if (fileSizeVector.empty())
+    if (!folderName.size())
+    {
         return;
+    }
 
-    // read first file and check max lengths of key tags (name and date of birth)
-    size_t dataLength = 0;
-    char* filePointer = fileSizeVector[0].filePointer;
-    size_t size = fileSizeVector[0].size;
+    this->ui->SaveOpenText->setText("Opening...");
+    this->ui->SaveOpenText->setVisible(true);
+    this->ui->progressBar->setVisible(true);
 
-    aFileHandler.SeekDicomTag(filePointer, 0x00100010, size, dataLength);
-    this->nameLength = dataLength;
 
-    aFileHandler.SeekDicomTag(filePointer, 0x00100030, size, dataLength);
-    this->dateLength = dataLength;
-
+    FileHandler* aFileHandler = new FileHandler;
+    connect(aFileHandler, SIGNAL(percentageProcessed(double)), this, SLOT(updateProgress(double)), Qt::QueuedConnection);
     this->ui->currentFileValue->setText(folderName);
 
+    QFuture<std::vector<FileSizeTuple>* > future = QtConcurrent::run(aFileHandler, &FileHandler::getFileSizeVector, this, folderName, listOfDirs);
+
+    this->watcher.setFuture(future);
+    connect(&this->watcher,SIGNAL(finished()),this, SLOT(dataLoaded()));
 }
 
 void MainWindow::on_action_Open_triggered()
@@ -123,7 +126,7 @@ void MainWindow::on_action_Open_triggered()
     aFileSizeTuple.filePointer = filePointer;
     aFileSizeTuple.size = size;
     aFileSizeTuple.filename = filename.toStdString();
-    fileSizeVector.push_back(aFileSizeTuple);
+    fileSizeVector->push_back(aFileSizeTuple);
 
     size_t dataLength = 0;
 
@@ -194,7 +197,7 @@ void MainWindow::on_anonPushButton_clicked()
     FileHandler aFileHandler;
     if (this->dateString != "NONE" && this->nameString != "NONE")
     {
-        if (fileSizeVector.empty())
+        if (fileSizeVector->empty())
         {
             QMessageBox aMessageBox;
             aMessageBox.setText("No files opened!");
@@ -212,10 +215,10 @@ void MainWindow::on_anonPushButton_clicked()
             return;
         }
 
-        for (unsigned int i = 0; i < fileSizeVector.size(); i++)
+        for (unsigned int i = 0; i < fileSizeVector->size(); i++)
         {
-            char* filePointer = fileSizeVector[i].filePointer;
-            size_t size = fileSizeVector[i].size;
+            char* filePointer = (*fileSizeVector)[i].filePointer;
+            size_t size = (*fileSizeVector)[i].size;
             size_t dataLength = 0;
             char* name = aFileHandler.SeekDicomTag(filePointer, 0x00100010, size, dataLength);
             char* date = aFileHandler.SeekDicomTag(filePointer, 0x00100030, size, dataLength);
@@ -256,7 +259,8 @@ void MainWindow::on_anonPushButton_clicked()
 
 void MainWindow::on_savePushButton_clicked()
 {
-    if (fileSizeVector.empty())
+
+    if (fileSizeVector->empty())
     {
         QMessageBox aMessageBox;
         aMessageBox.setText("No data loaded!");
@@ -273,6 +277,9 @@ void MainWindow::on_savePushButton_clicked()
         if (reply == QMessageBox::No)
             return;
     }
+    this->ui->SaveOpenText->setText("Saving...");
+    this->ui->SaveOpenText->setVisible(true);
+    this->ui->progressBar->setVisible(true);
     if (this->ui->radioFolder->isChecked())
     {
         saveFolder();
@@ -286,7 +293,7 @@ void MainWindow::on_savePushButton_clicked()
 void MainWindow::saveZip()
 {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
-                               "/home",
+                               "",
                                tr("Zip (*.zip)"));
 
     std::cout << fileName.toStdString() << std::endl;
@@ -308,7 +315,7 @@ void MainWindow::saveZip()
 void MainWindow::saveFolder()
 {
     QString folderName = QFileDialog::getExistingDirectory(this, "Save Directory",
-                                                       "/home",
+                                                       "",
                                                        QFileDialog::ShowDirsOnly
                                                        | QFileDialog::DontResolveSymlinks);
     for (int p = 0; p < listOfDirs.size(); p++)
@@ -345,10 +352,15 @@ void MainWindow::on_closeFilePushbutton_clicked()
         return;
     }
 
+    if (fileSizeVector)
+    {
+        for (unsigned int i = 0; i < fileSizeVector->size(); i++)
+            delete [] (*fileSizeVector)[i].filePointer;
+        fileSizeVector->clear();
 
-    for (unsigned int i = 0; i < fileSizeVector.size(); i++)
-        delete [] fileSizeVector[i].filePointer;
-    fileSizeVector.clear();
+        delete fileSizeVector;
+        fileSizeVector = 0;
+    }
 
     this->ui->currentFileValue->setText("NONE");
     this->ui->progressBar->setValue(0);
@@ -368,4 +380,33 @@ void MainWindow::updateProgress(double tick)
 void MainWindow::onComplete(bool success)
 {
     this->doNotClose = false;
+    this->ui->SaveOpenText->setVisible(false);
+    this->ui->progressBar->setVisible(false);
+}
+
+void MainWindow::dataLoaded()
+{
+    fileSizeVector = watcher.result();
+
+    if (!fileSizeVector || fileSizeVector->empty())
+    {
+        this->ui->currentFileValue->setText("NONE");
+        return;
+    }
+
+    // read first file and check max lengths of key tags (name and date of birth)
+    size_t dataLength = 0;
+    char* filePointer = (*fileSizeVector)[0].filePointer;
+    size_t size = (*fileSizeVector)[0].size;
+
+    FileHandler aFileHandler;
+    aFileHandler.SeekDicomTag(filePointer, 0x00100010, size, dataLength);
+    this->nameLength = dataLength;
+
+    aFileHandler.SeekDicomTag(filePointer, 0x00100030, size, dataLength);
+    this->dateLength = dataLength;
+
+
+    this->ui->SaveOpenText->setVisible(false);
+    this->ui->progressBar->setVisible(false);
 }
