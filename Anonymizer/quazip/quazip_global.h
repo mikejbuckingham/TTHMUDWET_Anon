@@ -33,6 +33,7 @@ see quazip/(un)zip.h files for details. Basically it's the zlib license.
   be defined explicitly to avoid possible troubles with unnecessary
   importing/exporting.
   */
+
 #ifdef QUAZIP_STATIC
 #define QUAZIP_EXPORT
 #else
@@ -40,6 +41,10 @@ see quazip/(un)zip.h files for details. Basically it's the zlib license.
  * When building a DLL with MSVC, QUAZIP_BUILD must be defined.
  * qglobal.h takes care of defining Q_DECL_* correctly for msvc/gcc.
  */
+#ifdef WIN32 | WIN64
+#define QUAZIP_BUILD 1
+#endif
+
 #if defined(QUAZIP_BUILD)
 	#define QUAZIP_EXPORT Q_DECL_EXPORT
 #else

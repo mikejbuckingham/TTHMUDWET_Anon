@@ -12,7 +12,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zlib.h"
+#ifdef WIN32 | WIN64
+#include <QtZlib/zlib.h>
+#elif
+#include <zlib.h>
+#endif
+
 #include "ioapi.h"
 #include "quazip_global.h"
 #include <QIODevice>
