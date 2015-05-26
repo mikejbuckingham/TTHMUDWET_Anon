@@ -41,7 +41,7 @@ see quazip/(un)zip.h files for details. Basically it's the zlib license.
  * When building a DLL with MSVC, QUAZIP_BUILD must be defined.
  * qglobal.h takes care of defining Q_DECL_* correctly for msvc/gcc.
  */
-#ifdef WIN32 | WIN64
+#ifdef WIN32
 #define QUAZIP_BUILD 1
 #endif
 

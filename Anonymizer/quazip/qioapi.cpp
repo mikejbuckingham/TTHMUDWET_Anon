@@ -12,9 +12,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef WIN32 | WIN64
+#ifdef WIN32
 #include <QtZlib/zlib.h>
-#elif
+#else
 #include <zlib.h>
 #endif
 

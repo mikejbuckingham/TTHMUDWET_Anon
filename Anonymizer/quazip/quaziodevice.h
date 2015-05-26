@@ -28,9 +28,9 @@ see quazip/(un)zip.h files for details. Basically it's the zlib license.
 #include <QIODevice>
 #include "quazip_global.h"
 
-#ifdef WIN32 | WIN64
+#ifdef WIN32
 #include <QtZlib/zlib.h>
-#elif
+#else
 #include <zlib.h>
 #endif
 

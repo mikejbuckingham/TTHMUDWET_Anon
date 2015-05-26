@@ -13,7 +13,7 @@ TEMPLATE = app
 
 unix:LIBS += -L/lib/x86_64-linux-gnu/ -lz
 
-$$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
+#$$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
 #qmake DEFINES+=ZLIB_WINAPI
 
 SOURCES += main.cpp\

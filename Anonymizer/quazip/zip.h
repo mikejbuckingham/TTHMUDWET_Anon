@@ -52,12 +52,10 @@ extern "C" {
 
 //#define HAVE_BZIP2
 
-#ifndef _ZLIB_H
-#ifdef WIN32 | WIN64
+#if !defined(_ZLIB_H) && defined(WIN32)
 #include <QtZlib/zlib.h>
-#elif
+#elif !defined(_ZLIB_H)
 #include <zlib.h>
-#endif
 #endif
 
 #ifndef _ZLIBIOAPI_H
