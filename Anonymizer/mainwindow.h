@@ -17,8 +17,13 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = 0);
-    void doStuff();
+    void saveZip();
+    void saveFolder();
     ~MainWindow();
+
+public slots:
+    void updateProgress(double tick);
+    void onComplete(bool);
 
 private slots:
     void on_actionOpen_Folder_triggered();

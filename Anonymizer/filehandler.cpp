@@ -13,9 +13,18 @@
 #include <QDir>
 #include <QDirIterator>
 
+#include <quazip/quazip.h>
+#include <quazip/quazipfile.h>
+
+const std::string OSSeperator = "/";
 
 FileHandler::FileHandler()
 {
+}
+
+FileHandler::~FileHandler()
+{
+
 }
 
 std::vector<FileSizeTuple> FileHandler::getFileSizeVector(QWidget* caller, QString& folderName, QStringList& listOfDirs)
@@ -42,14 +51,6 @@ std::vector<FileSizeTuple> FileHandler::getFileSizeVector(QWidget* caller, QStri
     {
         listOfDirs << itdir.next().remove(folderName);
     }
-
-    for (int i = 0; i < listOfDirs.size(); i++)
-    {
-        std::cout << listOfDirs[i].toStdString() << std::endl;
-    }
-
-
-
 
     FileHandler aFileHandler;
 
@@ -147,6 +148,80 @@ char* FileHandler::getFileAsBinary(std::string iFilename, size_t& length)
 
     length = size;
     return memoryBlock;
+}
+
+bool FileHandler::createZip(QString fullFileName, const std::vector<FileSizeTuple>& fileSizeVector)
+{
+    QuaZip* aQuaZip = new QuaZip(fullFileName);
+    //aQuaZip->setZip64Enabled(true);
+    aQuaZip->open(QuaZip::mdCreate);
+
+    double numbersOfFiles = fileSizeVector.size();
+    double tick = 100.0f / numbersOfFiles;
+    double currentPercentage = 0;
+
+    for (unsigned int i = 0; i < fileSizeVector.size(); i++)
+    {
+
+        QuaZipFile file(aQuaZip);
+
+        std::string finalName = fileSizeVector[i].filename.c_str();
+
+        // Strip the first character, if it starts with /
+        if (finalName.c_str()[0] == '/')
+        {
+            finalName = &finalName.c_str()[1];
+        }
+
+        QuaZipNewInfo newFileInfo(finalName.c_str());
+        newFileInfo.setPermissions(QFile::ReadOwner | QFile::WriteOwner | QFile::ReadOther | QFile::ReadGroup);
+
+        if (!file.open(QIODevice::WriteOnly, newFileInfo))
+        {
+            emit finished(false);
+            file.close();
+            aQuaZip->close();
+            delete aQuaZip;
+            return false;
+        }
+
+        file.write(fileSizeVector[i].filePointer, fileSizeVector[i].size);
+
+        file.close();
+
+        currentPercentage += tick;
+        emit percentageProcessed(currentPercentage);
+
+    }
+    aQuaZip->close();
+    delete aQuaZip;
+    std::cout << "Finished" << std::endl;
+    emit finished(true);
+    return true;
+}
+
+bool FileHandler::createFolder(QString folderName, std::vector<FileSizeTuple>& fileSizeVector)
+{
+
+    double numbersOfFiles = fileSizeVector.size();
+    double tick = 100.0f / numbersOfFiles;
+    double currentPercentage = 0;
+
+    for (unsigned int i = 0; i < fileSizeVector.size(); i++)
+    {
+        std::string newFilename = folderName.toStdString() + OSSeperator + fileSizeVector[i].filename;
+        size_t size = fileSizeVector[i].size;
+        char* filePointer = fileSizeVector[i].filePointer;
+
+        writeFileFromBinary(newFilename, size, filePointer);
+
+        currentPercentage += tick;
+        emit percentageProcessed(currentPercentage);
+    }
+
+    emit finished(true);
+    return true;
+
 }
 
 char* FileHandler::writeFileFromBinary(std::string iFilename, size_t length, char* binaryFile)

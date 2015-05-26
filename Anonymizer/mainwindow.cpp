@@ -21,7 +21,9 @@
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 
-const std::string OSSeperator = "/";
+#include <qtconcurrentrun.h>
+#include <QThread>
+
 std::string newFolderName = "Anon";
 
 
@@ -273,50 +275,15 @@ void MainWindow::on_savePushButton_clicked()
     }
     if (this->ui->radioFolder->isChecked())
     {
-        QString folderName = QFileDialog::getExistingDirectory(this, "Save Directory",
-                                                           "/home",
-                                                           QFileDialog::ShowDirsOnly
-                                                           | QFileDialog::DontResolveSymlinks);
-
-        for (int p = 0; p < listOfDirs.size(); p++)
-        {
-            std::string newSubDir = folderName.toStdString() + this->listOfDirs[p].toStdString();
-
-            if (!isDirExist(newSubDir))
-            {
-                makePath(newSubDir);
-            }
-        }
-
-        FileHandler aFileHandler;
-        unsigned int tick = fileSizeVector.size() / 100;
-        unsigned int progressValue = 0;
-        for (unsigned int i = 0; i < this->fileSizeVector.size(); i++)
-        {
-            std::string newFilename = folderName.toStdString() + OSSeperator + fileSizeVector[i].filename;
-            size_t size = fileSizeVector[i].size;
-            char* filePointer = fileSizeVector[i].filePointer;
-
-            aFileHandler.writeFileFromBinary(newFilename, size, filePointer);
-
-            if (!(i % tick))
-            {
-                // bump progress
-                ++progressValue;
-            }
-
-            this->ui->progressBar->setValue(progressValue);
-        }
-
-
+        saveFolder();
     }
     else if (this->ui->radioZip->isChecked())
     {
-        doStuff();
+        saveZip();
     }
 }
 
-void MainWindow::doStuff()
+void MainWindow::saveZip()
 {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
                                "/home",
@@ -330,51 +297,37 @@ void MainWindow::doStuff()
 
     fileName.remove(aFileInfo.absoluteDir().absolutePath() + "/");
 
-    QuaZip* aQuaZip = new QuaZip(fullFileName);
-    //aQuaZip->setZip64Enabled(true);
-    aQuaZip->open(QuaZip::mdCreate);
-
-    unsigned int tick = fileSizeVector.size() / 100;
-    unsigned int progressValue = 0;
+    FileHandler* aFileHandler = new FileHandler;
+    connect(aFileHandler, SIGNAL(percentageProcessed(double)), this, SLOT(updateProgress(double)), Qt::QueuedConnection);
+    connect(aFileHandler, SIGNAL(finished(bool)), this, SLOT(onComplete(bool)), Qt::QueuedConnection);
 
     this->doNotClose = true;
+    QtConcurrent::run(aFileHandler, &FileHandler::createZip, fullFileName, fileSizeVector);
+}
 
-    for (unsigned int i = 0; i < fileSizeVector.size(); i++)
+void MainWindow::saveFolder()
+{
+    QString folderName = QFileDialog::getExistingDirectory(this, "Save Directory",
+                                                       "/home",
+                                                       QFileDialog::ShowDirsOnly
+                                                       | QFileDialog::DontResolveSymlinks);
+    for (int p = 0; p < listOfDirs.size(); p++)
     {
+        std::string newSubDir = folderName.toStdString() + this->listOfDirs[p].toStdString();
 
-        QuaZipFile file(aQuaZip);
-
-        std::string finalName = fileSizeVector[i].filename.c_str();
-
-        // Strip the first character, if it starts with /
-        if (finalName.c_str()[0] == '/')
+        if (!isDirExist(newSubDir))
         {
-            finalName = &finalName.c_str()[1];
+            makePath(newSubDir);
         }
-
-        QuaZipNewInfo newFileInfo(finalName.c_str());
-        newFileInfo.setPermissions(QFile::ReadOwner | QFile::WriteOwner | QFile::ReadOther | QFile::ReadGroup);
-
-        file.open(QIODevice::WriteOnly, newFileInfo);
-
-        file.write(fileSizeVector[i].filePointer, fileSizeVector[i].size);
-
-
-
-        file.close();
-
-        if (!(i % tick))
-        {
-            // bump progress
-            ++progressValue;
-        }
-
-        this->ui->progressBar->setValue(progressValue);
-
     }
-    std::cout << "Finished!" << std::endl;
-    aQuaZip->close();
-    this->doNotClose = false;
+
+    FileHandler* aFileHandler = new FileHandler;
+    connect(aFileHandler, SIGNAL(percentageProcessed(double)), this, SLOT(updateProgress(double)), Qt::QueuedConnection);
+    connect(aFileHandler, SIGNAL(finished(bool)), this, SLOT(onComplete(bool)), Qt::QueuedConnection);
+
+    this->doNotClose = true;
+    QtConcurrent::run(aFileHandler, &FileHandler::createFolder, folderName, fileSizeVector);
+
 }
 
 void MainWindow::on_openFolderPushButton_clicked()
@@ -405,4 +358,14 @@ void MainWindow::on_closeFilePushbutton_clicked()
 void MainWindow::on_openFilePushButton_clicked()
 {
     on_action_Open_triggered();
+}
+
+void MainWindow::updateProgress(double tick)
+{
+    this->ui->progressBar->setValue(tick);
+}
+
+void MainWindow::onComplete(bool success)
+{
+    this->doNotClose = false;
 }
