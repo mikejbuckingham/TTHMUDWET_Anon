@@ -33,14 +33,32 @@ MainWindow::MainWindow(QWidget *parent) :
     this->firstInput = true;
     this->isAnon = false;
     this->ui->radioZip->setChecked(true);
-    this->dateString = "NONE";
-    this->nameString = "NONE";
+    this->dateString = "";
+    this->nameString = "";
     this->nameLength = 0;
     this->dateLength = 0;
     this->doNotClose = false;
     this->ui->progressBar->setVisible(false);
     this->ui->SaveOpenText->setVisible(false);
     this->fileSizeVector = 0;
+
+    // old stuff - keeping just in case we want to revert
+    this->ui->savePushButton->setVisible(false);
+    this->ui->setStringsButton->setVisible(false);
+
+    // normal stuff
+
+    this->ui->radioZip->setVisible(false);
+    this->ui->radioFolder->setVisible(false);
+    this->ui->anonPushButton->setVisible(false);
+
+    this->ui->newDobBox->setVisible(false);
+    this->ui->newNameBox->setVisible(false);
+    this->ui->NewDobLabel->setVisible(false);
+    this->ui->newNameLabel->setVisible(false);
+    this->ui->folderNameLabel->setAlignment(Qt::AlignRight);
+    this->ui->folderNameLabel->setText("");
+    this->ui->folderNameLabel->setVisible(false);
 }
 
 MainWindow::~MainWindow()
@@ -78,6 +96,8 @@ void MainWindow::on_actionOpen_Folder_triggered()
         return;
     }
 
+    this->ui->folderNameLabel->setText(folderName);
+    this->ui->folderNameLabel->setVisible(true);
     this->ui->SaveOpenText->setText("Opening...");
     this->ui->SaveOpenText->setVisible(true);
     this->ui->progressBar->setVisible(true);
@@ -85,7 +105,6 @@ void MainWindow::on_actionOpen_Folder_triggered()
 
     FileHandler* aFileHandler = new FileHandler;
     connect(aFileHandler, SIGNAL(percentageProcessed(double)), this, SLOT(updateProgress(double)), Qt::QueuedConnection);
-    this->ui->currentFileValue->setText(folderName);
 
     QFuture<std::vector<FileSizeTuple>* > future = QtConcurrent::run(aFileHandler, &FileHandler::getFileSizeVector, this, folderName, listOfDirs);
 
@@ -104,7 +123,15 @@ void MainWindow::on_newPushButton_clicked()
     // we need to prompt
     on_closeFilePushbutton_clicked();
 
-    if (!firstInput && this->nameString != "NONE" && this->dateString != "NONE")
+    this->ui->newDobBox->setVisible(false);
+    this->ui->newNameBox->setVisible(false);
+    this->ui->NewDobLabel->setVisible(false);
+    this->ui->newNameLabel->setVisible(false);
+
+    this->dateString = this->ui->newDobBox->text().toStdString();
+    this->nameString = this->ui->newNameBox->text().toStdString();
+
+    if (!firstInput && (this->nameString != "" || this->dateString != ""))
     {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this, "New Session?", "Keep anonymisation key?",
@@ -112,16 +139,21 @@ void MainWindow::on_newPushButton_clicked()
 
         if (reply == QMessageBox::Yes)
         {
-
+            this->ui->newDobBox->setVisible(true);
+            this->ui->newNameBox->setVisible(true);
+            this->ui->NewDobLabel->setVisible(true);
+            this->ui->newNameLabel->setVisible(true);
         }
         else
         {
-            this->nameString = "NONE";
-            this->dateString = "NONE";
+            this->nameString = "";
+            this->dateString = "";
+            this->ui->newDobBox->clear();
+            this->ui->newNameBox->clear();
+
+
         }
     }
-    else
-        firstInput = false;
 
     this->isAnon = false;
 }
@@ -139,17 +171,19 @@ void MainWindow::on_setStringsButton_clicked()
     std::string dateResultStd = dateResult.toStdString();
 
     this->dateString = dateResultStd;
-
-
-    this->firstInput = false;
 }
 
 void MainWindow::on_anonPushButton_clicked()
 {
     FileHandler aFileHandler;
-    if (this->dateString != "NONE" && this->nameString != "NONE")
+
+
+    this->dateString = this->ui->newDobBox->text().toStdString();
+    this->nameString = this->ui->newNameBox->text().toStdString();
+
+    if (this->dateString != "" && this->nameString != "")
     {
-        if (fileSizeVector->empty())
+        if (!fileSizeVector || fileSizeVector->empty())
         {
             QMessageBox aMessageBox;
             aMessageBox.setText("No files opened!");
@@ -157,13 +191,17 @@ void MainWindow::on_anonPushButton_clicked()
         }
         if (this->dateString.length() > this->dateLength)
         {
-            std::cout << "DateString too long!" << std::endl;
+            QMessageBox aMessageBox;
+            aMessageBox.setText("New DoB is too long! Aborting!");
+            aMessageBox.exec();
             return;
         }
 
         if (this->nameString.length() > this->nameLength)
         {
-            std::cout << "NameString too long!";
+            QMessageBox aMessageBox;
+            aMessageBox.setText("New name is too long! Aborting!");
+            aMessageBox.exec();
             return;
         }
 
@@ -199,6 +237,18 @@ void MainWindow::on_anonPushButton_clicked()
 
         this->isAnon = true;
 
+        this->ui->SaveOpenText->setText("Saving...");
+        this->ui->SaveOpenText->setVisible(true);
+        this->ui->progressBar->setVisible(true);
+        if (this->ui->radioFolder->isChecked())
+        {
+            saveFolder();
+        }
+        else if (this->ui->radioZip->isChecked())
+        {
+            saveZip();
+        }
+
     }
     else
     {
@@ -206,6 +256,8 @@ void MainWindow::on_anonPushButton_clicked()
         aMessageBox.setText("No anonymisation strings set!");
         aMessageBox.exec();
     }
+
+    this->firstInput = false;
 }
 
 void MainWindow::on_savePushButton_clicked()
@@ -227,17 +279,6 @@ void MainWindow::on_savePushButton_clicked()
 
         if (reply == QMessageBox::No)
             return;
-    }
-    this->ui->SaveOpenText->setText("Saving...");
-    this->ui->SaveOpenText->setVisible(true);
-    this->ui->progressBar->setVisible(true);
-    if (this->ui->radioFolder->isChecked())
-    {
-        saveFolder();
-    }
-    else if (this->ui->radioZip->isChecked())
-    {
-        saveZip();
     }
 }
 
@@ -313,8 +354,20 @@ void MainWindow::on_closeFilePushbutton_clicked()
         fileSizeVector = 0;
     }
 
-    this->ui->currentFileValue->setText("NONE");
-    this->ui->progressBar->setValue(0);
+    if (this->ui->newDobBox->text() == "" && this->ui->newNameBox->text() == "")
+    {
+        this->ui->newDobBox->setVisible(false);
+        this->ui->newNameBox->setVisible(false);
+        this->ui->NewDobLabel->setVisible(false);
+        this->ui->newNameLabel->setVisible(false);
+    }
+
+    this->ui->folderNameLabel->setText("");
+    this->ui->folderNameLabel->setVisible(false);
+
+    this->ui->radioZip->setVisible(false);
+    this->ui->radioFolder->setVisible(false);
+    this->ui->anonPushButton->setVisible(false);
 }
 
 void MainWindow::updateProgress(double tick)
@@ -337,13 +390,21 @@ void MainWindow::onComplete(bool success)
 
 void MainWindow::dataLoaded()
 {
-    fileSizeVector = watcher.result();
-
+    fileSizeVector = this->watcher.result();
     if (!fileSizeVector || fileSizeVector->empty())
     {
-        this->ui->currentFileValue->setText("NONE");
+        QMessageBox aMessageBox;
+        aMessageBox.setText("Load failed!");
+        aMessageBox.exec();
+
+        this->ui->SaveOpenText->setVisible(false);
+        this->ui->progressBar->setVisible(false);
+        this->ui->folderNameLabel->setText("");
+        this->ui->folderNameLabel->setVisible(false);
         return;
     }
+
+    this->firstInput = false;
 
     // read first file and check max lengths of key tags (name and date of birth)
     size_t dataLength = 0;
@@ -362,4 +423,13 @@ void MainWindow::dataLoaded()
     this->ui->progressBar->setVisible(false);
 
     this->doNotClose = false;
+
+    this->ui->radioZip->setVisible(true);
+    this->ui->radioFolder->setVisible(true);
+    this->ui->anonPushButton->setVisible(true);
+
+    this->ui->newDobBox->setVisible(true);
+    this->ui->newNameBox->setVisible(true);
+    this->ui->NewDobLabel->setVisible(true);
+    this->ui->newNameLabel->setVisible(true);
 }

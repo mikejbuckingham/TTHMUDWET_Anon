@@ -58,6 +58,8 @@ std::vector<FileSizeTuple>* FileHandler::getFileSizeVector(QWidget* caller, QStr
     double tick = 100.0f / numbersOfFiles;
     double currentPercentage = 0;
 
+    double confirmDicom = false;
+
     // let's do a hack for now (need to strip the .. and .)
     for (int i = 0; i < listOfFiles.size(); i++)
     {
@@ -72,11 +74,22 @@ std::vector<FileSizeTuple>* FileHandler::getFileSizeVector(QWidget* caller, QStr
 
             if (aFileSizeTuple.filePointer)
                 aFileSizeVector->push_back(aFileSizeTuple);
-            else
+
+            if (!confirmDicom && !aFileSizeVector->empty())
             {
-                std::cout << "ABORT ABORT ABORT" << std::endl;
-                std::cout << aFileSizeTuple.filename;
-                std::abort();
+                // 0x8 offset
+                char* DICOMAdd = (*aFileSizeVector)[0].filePointer + 0x80;
+
+
+                if ((*aFileSizeVector)[0].size > 0x84 && DICOMAdd[0] == 'D' && DICOMAdd[1] == 'I'
+                        && DICOMAdd[2] == 'C' && DICOMAdd[3] == 'M')
+                {
+                    confirmDicom = true;
+                }
+                else
+                {
+                    return NULL;
+                }
 
             }
         }
