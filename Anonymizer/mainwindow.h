@@ -30,8 +30,6 @@ public slots:
 private slots:
     void on_actionOpen_Folder_triggered();
 
-    void on_action_Open_triggered();
-
     void on_actionClose_triggered();
 
     void on_newPushButton_clicked();
@@ -45,8 +43,6 @@ private slots:
     void on_openFolderPushButton_clicked();
 
     void on_closeFilePushbutton_clicked();
-
-    void on_openFilePushButton_clicked();
 
 private:
     Ui::MainWindow *ui;

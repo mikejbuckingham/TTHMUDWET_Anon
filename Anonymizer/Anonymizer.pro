@@ -32,7 +32,8 @@ SOURCES += main.cpp\
     quazip/quazipfileinfo.cpp \
     quazip/quazipnewinfo.cpp \
     quazip/unzip.c \
-    quazip/zip.c
+    quazip/zip.c \
+    medStyleSheetParser.cpp
 
 HEADERS  += mainwindow.h \
     filehandler.h \
@@ -52,6 +53,12 @@ HEADERS  += mainwindow.h \
     quazip/quazipfileinfo.h \
     quazip/quazipnewinfo.h \
     quazip/unzip.h \
-    quazip/zip.h
+    quazip/zip.h \
+    medStyleSheetParser.h
 
 FORMS    += mainwindow.ui
+
+RESOURCES = anonymiser.qrc
+
+OTHER_FILES += \
+    medInria.qss
