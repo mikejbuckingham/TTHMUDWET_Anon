@@ -21,7 +21,11 @@
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 
+#ifdef WIN32
+#include <QtConcurrent/QtConcurrent>
+#else
 #include <qtconcurrentrun.h>
+#endif
 #include <QThread>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -71,6 +75,14 @@ void MainWindow::on_actionOpen_Folder_triggered()
 {
     // Get all files and read them into memory
     // prompt to close if we already have a file
+    if (this->doNotClose)
+    {
+        QMessageBox aMessageBox;
+        aMessageBox.setText("Please wait until process has finished!");
+        aMessageBox.exec();
+        return;
+    }
+
     if (fileSizeVector && !fileSizeVector->empty())
     {
         QMessageBox::StandardButton reply;
@@ -79,7 +91,8 @@ void MainWindow::on_actionOpen_Folder_triggered()
 
         if (reply == QMessageBox::Yes)
         {
-            on_closeFilePushbutton_clicked();
+            if (!closeFiles())
+                return;
         }
         else
             return;
@@ -108,10 +121,9 @@ void MainWindow::on_actionOpen_Folder_triggered()
         fileHandler = new FileHandler;
     connect(fileHandler, SIGNAL(percentageProcessed(double)), this, SLOT(updateProgress(double)), Qt::QueuedConnection);
 
-    QFuture<std::vector<FileSizeTuple>* > future = QtConcurrent::run(fileHandler, &FileHandler::getFileSizeVector, this, folderName, &listOfDirs);
-
-    this->watcher.setFuture(future);
     connect(&this->watcher,SIGNAL(finished()),this, SLOT(dataLoaded()));
+
+    this->watcher.setFuture(QtConcurrent::run(fileHandler, &FileHandler::getFileSizeVector, this, folderName, &listOfDirs));
 }
 
 void MainWindow::on_actionClose_triggered()
@@ -123,7 +135,9 @@ void MainWindow::on_newPushButton_clicked()
 {
     // if we have already opened at least one file this session,
     // we need to prompt
-    on_closeFilePushbutton_clicked();
+
+    if (!closeFiles())
+        return;
 
     if (this->doNotClose)
         return;
@@ -180,7 +194,13 @@ void MainWindow::on_setStringsButton_clicked()
 
 void MainWindow::on_anonPushButton_clicked()
 {
-
+    if (!this->doNotClose)
+    {
+        QMessageBox aMessageBox;
+        aMessageBox.setText("Please wait until process has finished!");
+        aMessageBox.exec();
+        return;
+    }
 
     if (!fileHandler)
         fileHandler = new FileHandler;
@@ -356,14 +376,14 @@ void MainWindow::on_openFolderPushButton_clicked()
     on_actionOpen_Folder_triggered();
 }
 
-void MainWindow::on_closeFilePushbutton_clicked()
+bool MainWindow::closeFiles()
 {
     if (this->doNotClose)
     {
         QMessageBox aMessageBox;
         aMessageBox.setText("Please wait until process has finished!");
         aMessageBox.exec();
-        return;
+        return false;
     }
 
     if (fileSizeVector)
@@ -396,6 +416,13 @@ void MainWindow::on_closeFilePushbutton_clicked()
     this->ui->radioZip->setVisible(false);
     this->ui->radioFolder->setVisible(false);
     this->ui->anonPushButton->setVisible(false);
+
+    return true;
+}
+
+void MainWindow::on_closeFilePushbutton_clicked()
+{
+    closeFiles();
 }
 
 void MainWindow::updateProgress(double tick)

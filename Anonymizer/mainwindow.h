@@ -20,6 +20,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     void saveZip();
     void saveFolder();
+    bool closeFiles();
     ~MainWindow();
 
 public slots:
