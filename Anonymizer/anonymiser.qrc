@@ -1,5 +1,7 @@
 <RCC>
 <qresource prefix="/">
 <file>medInria.qss</file>
+<file>pixmaps/radio.png</file>
+<file>pixmaps/radio-checked.png</file>
 </qresource>
 </RCC>
