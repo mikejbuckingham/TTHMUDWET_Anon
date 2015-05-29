@@ -27,8 +27,9 @@ FileHandler::~FileHandler()
 
 }
 
-std::vector<FileSizeTuple>* FileHandler::getFileSizeVector(QWidget* caller, QString& folderName, QStringList& listOfDirs)
+std::vector<FileSizeTuple>* FileHandler::getFileSizeVector(QWidget* caller, QString& folderName, QStringList* listOfDirsPtr)
 {
+    QStringList& listOfDirs = *listOfDirsPtr;
     if (folderName.isNull())
     {
         emit finished(false);
@@ -58,8 +59,6 @@ std::vector<FileSizeTuple>* FileHandler::getFileSizeVector(QWidget* caller, QStr
     double tick = 100.0f / numbersOfFiles;
     double currentPercentage = 0;
 
-    double confirmDicom = false;
-
     // let's do a hack for now (need to strip the .. and .)
     for (int i = 0; i < listOfFiles.size(); i++)
     {
@@ -73,32 +72,37 @@ std::vector<FileSizeTuple>* FileHandler::getFileSizeVector(QWidget* caller, QStr
             aFileSizeTuple.size = size;
 
             if (aFileSizeTuple.filePointer)
-                aFileSizeVector->push_back(aFileSizeTuple);
-
-            if (!confirmDicom && !aFileSizeVector->empty())
             {
-                // 0x8 offset
-                char* DICOMAdd = (*aFileSizeVector)[0].filePointer + 0x80;
 
-
-                if ((*aFileSizeVector)[0].size > 0x84 && DICOMAdd[0] == 'D' && DICOMAdd[1] == 'I'
-                        && DICOMAdd[2] == 'C' && DICOMAdd[3] == 'M')
+                if (aFileSizeTuple.size > 0x84)
                 {
-                    confirmDicom = true;
+
+                    char* DICOMAdd = aFileSizeTuple.filePointer + 0x80;
+                    if (DICOMAdd[0] == 'D' && DICOMAdd[1] == 'I'
+                            && DICOMAdd[2] == 'C' && DICOMAdd[3] == 'M')
+                    {
+                        aFileSizeVector->push_back(aFileSizeTuple);
+                    }
+                    else
+                    {
+                        delete [] aFileSizeTuple.filePointer;
+                    }
                 }
                 else
-                {
-                    return NULL;
-                }
-
+                    delete [] aFileSizeTuple.filePointer;
             }
         }
 
         currentPercentage += tick;
         emit percentageProcessed(currentPercentage);
     }
-
-    return aFileSizeVector;
+    if (aFileSizeVector->size() > 0)
+        return aFileSizeVector;
+    else
+    {
+        delete aFileSizeVector;
+        return NULL;
+    }
 }
 
 char* FileHandler::SeekDicomTag(char* memoryBlock, unsigned int tag, size_t length, size_t& oDataLength)

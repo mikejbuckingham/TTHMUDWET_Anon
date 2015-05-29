@@ -106,7 +106,7 @@ void MainWindow::on_actionOpen_Folder_triggered()
     FileHandler* aFileHandler = new FileHandler;
     connect(aFileHandler, SIGNAL(percentageProcessed(double)), this, SLOT(updateProgress(double)), Qt::QueuedConnection);
 
-    QFuture<std::vector<FileSizeTuple>* > future = QtConcurrent::run(aFileHandler, &FileHandler::getFileSizeVector, this, folderName, listOfDirs);
+    QFuture<std::vector<FileSizeTuple>* > future = QtConcurrent::run(aFileHandler, &FileHandler::getFileSizeVector, this, folderName, &listOfDirs);
 
     this->watcher.setFuture(future);
     connect(&this->watcher,SIGNAL(finished()),this, SLOT(dataLoaded()));
@@ -274,7 +274,7 @@ void MainWindow::on_savePushButton_clicked()
     {
         // throw dialogue
         QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Data not anonymised!", "Continue anyway?",
+        reply = QMessageBox::question(this, "", "Data not anonymised! Continue anyway?",
                                       QMessageBox::Yes|QMessageBox::No);
 
         if (reply == QMessageBox::No)
