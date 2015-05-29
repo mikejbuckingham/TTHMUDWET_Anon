@@ -16,6 +16,8 @@
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 
+#include <medStyleSheetParser.h>
+
 const std::string OSSeperator = "/";
 
 FileHandler::FileHandler()
@@ -59,7 +61,6 @@ std::vector<FileSizeTuple>* FileHandler::getFileSizeVector(QWidget* caller, QStr
     double tick = 100.0f / numbersOfFiles;
     double currentPercentage = 0;
 
-    // let's do a hack for now (need to strip the .. and .)
     for (int i = 0; i < listOfFiles.size(); i++)
     {
         size_t size = 0;
@@ -115,14 +116,12 @@ char* FileHandler::SeekDicomTag(char* memoryBlock, unsigned int tag, size_t leng
     // words are unsigned shorts
     // read the data sequentially in words
     // check if the tag matches (each tag is two words)
-    // return a pointer? Should we also evaluate endianness here? Probably..
-    // Do we need to know the length of the tag content? Should we zero it? What's the correct 'null' value for dicom? Spam spaces?
 
     // number of words
     unsigned int nWords = nRead / sizeof(unsigned short);
     for (unsigned int i = 0; i < nWords-2; i++)
     {
-        // endianness fuckabout, I assume
+        // endianness
         if ((bufferHandler[i] == pTag[1]) && bufferHandler[i+1] == pTag[0])
         {
             // We have found a tag, such that 4 bytes equals our int tag
@@ -136,7 +135,7 @@ char* FileHandler::SeekDicomTag(char* memoryBlock, unsigned int tag, size_t leng
 
             dataElementPtr += 4;
 
-            // now the fun bit - do we have a VR? Just length? BECAUSE FUCK YOU DICOM STANDARD
+            // now the fun bit - do we have a VR? Just length?
 
             // TODO we currently assume 2bytes VR, 2bytes length
 

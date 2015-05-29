@@ -14,6 +14,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     MainWindow w;
+    a.setStyle("plastique");
 
     QFile f(":/medInria.qss");
     if (!f.exists())

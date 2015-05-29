@@ -58,7 +58,7 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui
 
-RESOURCES = anonymiser.qrc
+RESOURCES =
 
 OTHER_FILES += \
     medInria.qss

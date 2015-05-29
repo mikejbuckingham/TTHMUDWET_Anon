@@ -84,17 +84,17 @@ void MainWindow::on_actionOpen_Folder_triggered()
             return;
     }
 
-    this->doNotClose = true;
-
     QString folderName = QFileDialog::getExistingDirectory(this, "Open Directory",
                                                            "",
                                                            QFileDialog::ShowDirsOnly
-                                                           | QFileDialog::DontResolveSymlinks);
+                                                           | QFileDialog::DontResolveSymlinks | QFileDialog::DontUseNativeDialog);
 
     if (!folderName.size())
     {
         return;
     }
+
+    this->doNotClose = true;
 
     this->ui->folderNameLabel->setText(folderName);
     this->ui->folderNameLabel->setVisible(true);
@@ -122,6 +122,9 @@ void MainWindow::on_newPushButton_clicked()
     // if we have already opened at least one file this session,
     // we need to prompt
     on_closeFilePushbutton_clicked();
+
+    if (this->doNotClose)
+        return;
 
     this->ui->newDobBox->setVisible(false);
     this->ui->newNameBox->setVisible(false);
@@ -237,9 +240,6 @@ void MainWindow::on_anonPushButton_clicked()
 
         this->isAnon = true;
 
-        this->ui->SaveOpenText->setText("Saving...");
-        this->ui->SaveOpenText->setVisible(true);
-        this->ui->progressBar->setVisible(true);
         if (this->ui->radioFolder->isChecked())
         {
             saveFolder();
@@ -286,9 +286,14 @@ void MainWindow::saveZip()
 {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
                                "",
-                               tr("Zip (*.zip)"));
+                               tr("Zip (*.zip)"), 0, QFileDialog::DontUseNativeDialog);
 
-    std::cout << fileName.toStdString() << std::endl;
+    if (fileName == "")
+        return;
+
+    this->ui->SaveOpenText->setText("Saving...");
+    this->ui->SaveOpenText->setVisible(true);
+    this->ui->progressBar->setVisible(true);
 
     QFileInfo aFileInfo(fileName);
 
@@ -309,7 +314,15 @@ void MainWindow::saveFolder()
     QString folderName = QFileDialog::getExistingDirectory(this, "Save Directory",
                                                        "",
                                                        QFileDialog::ShowDirsOnly
-                                                       | QFileDialog::DontResolveSymlinks);
+                                                       | QFileDialog::DontResolveSymlinks | QFileDialog::DontUseNativeDialog);
+
+    if (folderName == "")
+        return;
+
+    this->ui->SaveOpenText->setText("Saving...");
+    this->ui->SaveOpenText->setVisible(true);
+    this->ui->progressBar->setVisible(true);
+
     for (int p = 0; p < listOfDirs.size(); p++)
     {
         std::string newSubDir = folderName.toStdString() + this->listOfDirs[p].toStdString();
