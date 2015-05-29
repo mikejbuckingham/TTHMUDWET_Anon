@@ -82,7 +82,7 @@
      <string>Set strings</string>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>150</x>
@@ -122,7 +122,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>120</x>
@@ -158,8 +158,8 @@
    <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
-      <x>11</x>
-      <y>11</y>
+      <x>12</x>
+      <y>20</y>
       <width>100</width>
       <height>136</height>
      </rect>
@@ -186,16 +186,21 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QPushButton" name="pushButton">
+       <property name="text">
+        <string>About</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
-   <zorder>radioZip</zorder>
-   <zorder>radioFolder</zorder>
+   <zorder>savePushButton</zorder>
+   <zorder>setStringsButton</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>layoutWidget</zorder>
-   <zorder>newNameLabel</zorder>
-   <zorder>NewDobLabel</zorder>
-   <zorder>newNameBox</zorder>
-   <zorder>newDobBox</zorder>
+   <zorder>layoutWidget</zorder>
+   <zorder>layoutWidget</zorder>
    <zorder>folderNameLabel</zorder>
    <zorder>pushButton</zorder>
   </widget>

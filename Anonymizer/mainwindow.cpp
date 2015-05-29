@@ -446,3 +446,10 @@ void MainWindow::dataLoaded()
     this->ui->NewDobLabel->setVisible(true);
     this->ui->newNameLabel->setVisible(true);
 }
+
+void MainWindow::on_pushButton_clicked()
+{
+    QMessageBox aMessageBox;
+    aMessageBox.setText("MUSIC Anonymisation tool - Copyright 2015");
+    aMessageBox.exec();
+}
