@@ -194,7 +194,7 @@ void MainWindow::on_setStringsButton_clicked()
 
 void MainWindow::on_anonPushButton_clicked()
 {
-    if (!this->doNotClose)
+    if (this->doNotClose)
     {
         QMessageBox aMessageBox;
         aMessageBox.setText("Please wait until process has finished!");
