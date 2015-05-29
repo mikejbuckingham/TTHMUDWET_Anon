@@ -41,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->progressBar->setVisible(false);
     this->ui->SaveOpenText->setVisible(false);
     this->fileSizeVector = 0;
+    this->fileHandler = 0;
 
     // old stuff - keeping just in case we want to revert
     this->ui->savePushButton->setVisible(false);
@@ -103,10 +104,11 @@ void MainWindow::on_actionOpen_Folder_triggered()
     this->ui->progressBar->setVisible(true);
 
 
-    FileHandler* aFileHandler = new FileHandler;
-    connect(aFileHandler, SIGNAL(percentageProcessed(double)), this, SLOT(updateProgress(double)), Qt::QueuedConnection);
+    if (!fileHandler)
+        fileHandler = new FileHandler;
+    connect(fileHandler, SIGNAL(percentageProcessed(double)), this, SLOT(updateProgress(double)), Qt::QueuedConnection);
 
-    QFuture<std::vector<FileSizeTuple>* > future = QtConcurrent::run(aFileHandler, &FileHandler::getFileSizeVector, this, folderName, &listOfDirs);
+    QFuture<std::vector<FileSizeTuple>* > future = QtConcurrent::run(fileHandler, &FileHandler::getFileSizeVector, this, folderName, &listOfDirs);
 
     this->watcher.setFuture(future);
     connect(&this->watcher,SIGNAL(finished()),this, SLOT(dataLoaded()));
@@ -178,7 +180,10 @@ void MainWindow::on_setStringsButton_clicked()
 
 void MainWindow::on_anonPushButton_clicked()
 {
-    FileHandler aFileHandler;
+
+
+    if (!fileHandler)
+        fileHandler = new FileHandler;
 
 
     this->dateString = this->ui->newDobBox->text().toStdString();
@@ -213,8 +218,8 @@ void MainWindow::on_anonPushButton_clicked()
             char* filePointer = (*fileSizeVector)[i].filePointer;
             size_t size = (*fileSizeVector)[i].size;
             size_t dataLength = 0;
-            char* name = aFileHandler.SeekDicomTag(filePointer, 0x00100010, size, dataLength);
-            char* date = aFileHandler.SeekDicomTag(filePointer, 0x00100030, size, dataLength);
+            char* name = fileHandler->SeekDicomTag(filePointer, 0x00100010, size, dataLength);
+            char* date = fileHandler->SeekDicomTag(filePointer, 0x00100030, size, dataLength);
 
             for (unsigned int i = 0; i < nameLength; i++)
             {
@@ -301,12 +306,14 @@ void MainWindow::saveZip()
 
     fileName.remove(aFileInfo.absoluteDir().absolutePath() + "/");
 
-    FileHandler* aFileHandler = new FileHandler;
-    connect(aFileHandler, SIGNAL(percentageProcessed(double)), this, SLOT(updateProgress(double)), Qt::QueuedConnection);
-    connect(aFileHandler, SIGNAL(finished(bool)), this, SLOT(onComplete(bool)), Qt::QueuedConnection);
+    if (!fileHandler)
+        fileHandler = new FileHandler;
+
+    connect(fileHandler, SIGNAL(percentageProcessed(double)), this, SLOT(updateProgress(double)), Qt::QueuedConnection);
+    connect(fileHandler, SIGNAL(finished(bool)), this, SLOT(onComplete(bool)), Qt::QueuedConnection);
 
     this->doNotClose = true;
-    QtConcurrent::run(aFileHandler, &FileHandler::createZip, fullFileName, fileSizeVector);
+    QtConcurrent::run(fileHandler, &FileHandler::createZip, fullFileName, fileSizeVector);
 }
 
 void MainWindow::saveFolder()
@@ -333,12 +340,14 @@ void MainWindow::saveFolder()
         }
     }
 
-    FileHandler* aFileHandler = new FileHandler;
-    connect(aFileHandler, SIGNAL(percentageProcessed(double)), this, SLOT(updateProgress(double)), Qt::QueuedConnection);
-    connect(aFileHandler, SIGNAL(finished(bool)), this, SLOT(onComplete(bool)), Qt::QueuedConnection);
+    if (!fileHandler)
+        fileHandler = new FileHandler;
+
+    connect(fileHandler, SIGNAL(percentageProcessed(double)), this, SLOT(updateProgress(double)), Qt::QueuedConnection);
+    connect(fileHandler, SIGNAL(finished(bool)), this, SLOT(onComplete(bool)), Qt::QueuedConnection);
 
     this->doNotClose = true;
-    QtConcurrent::run(aFileHandler, &FileHandler::createFolder, folderName, fileSizeVector);
+    QtConcurrent::run(fileHandler, &FileHandler::createFolder, folderName, fileSizeVector);
 
 }
 
@@ -365,6 +374,12 @@ void MainWindow::on_closeFilePushbutton_clicked()
 
         delete fileSizeVector;
         fileSizeVector = 0;
+    }
+
+    if (fileHandler)
+    {
+        delete fileHandler;
+        fileHandler = 0;
     }
 
     if (this->ui->newDobBox->text() == "" && this->ui->newNameBox->text() == "")
@@ -424,11 +439,13 @@ void MainWindow::dataLoaded()
     char* filePointer = (*fileSizeVector)[0].filePointer;
     size_t size = (*fileSizeVector)[0].size;
 
-    FileHandler aFileHandler;
-    aFileHandler.SeekDicomTag(filePointer, 0x00100010, size, dataLength);
+    if (!fileHandler)
+        fileHandler = new FileHandler;
+
+    fileHandler->SeekDicomTag(filePointer, 0x00100010, size, dataLength);
     this->nameLength = dataLength;
 
-    aFileHandler.SeekDicomTag(filePointer, 0x00100030, size, dataLength);
+    fileHandler->SeekDicomTag(filePointer, 0x00100030, size, dataLength);
     this->dateLength = dataLength;
 
 

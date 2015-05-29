@@ -58,6 +58,7 @@ private:
     QStringList listOfDirs;
     bool doNotClose;
     QFutureWatcher<std::vector<FileSizeTuple>* > watcher;
+    FileHandler* fileHandler;
 };
 
 #endif // MAINWINDOW_H
