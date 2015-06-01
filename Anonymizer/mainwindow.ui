@@ -155,7 +155,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>12</x>
@@ -165,13 +165,6 @@
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
-     <item>
-      <widget class="QPushButton" name="newPushButton">
-       <property name="text">
-        <string>New</string>
-       </property>
-      </widget>
-     </item>
      <item>
       <widget class="QPushButton" name="openFolderPushButton">
        <property name="text">
@@ -202,7 +195,6 @@
    <zorder>layoutWidget</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>folderNameLabel</zorder>
-   <zorder>pushButton</zorder>
   </widget>
   <action name="action_Open">
    <property name="text">

@@ -21,11 +21,12 @@
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 
-#ifdef WIN32
-#include <QtConcurrent/QtConcurrent>
-#else
+#ifdef __APPLE__
 #include <qtconcurrentrun.h>
+#else
+#include <QtConcurrent/QtConcurrent>
 #endif
+
 #include <QThread>
 
 MainWindow::MainWindow(QWidget *parent) :
