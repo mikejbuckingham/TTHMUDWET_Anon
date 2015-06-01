@@ -174,6 +174,9 @@
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QPushButton" name="openFolderPushButton">
+       <property name="toolTip">
+        <string>Open a folder with your DICOMs</string>
+       </property>
        <property name="text">
         <string>Open Folder</string>
        </property>
@@ -181,6 +184,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="closeFilePushbutton">
+       <property name="toolTip">
+        <string>Close your DICOM file</string>
+       </property>
        <property name="text">
         <string>Close File</string>
        </property>
@@ -188,6 +194,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="newPushButton">
+       <property name="toolTip">
+        <string>Close your DICOM file and clear anonymisation names</string>
+       </property>
        <property name="text">
         <string>Close and Clear</string>
        </property>
@@ -195,6 +204,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="pushButton">
+       <property name="toolTip">
+        <string>About this tool</string>
+       </property>
        <property name="text">
         <string>About</string>
        </property>
