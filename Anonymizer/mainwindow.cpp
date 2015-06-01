@@ -496,6 +496,7 @@ void MainWindow::dataLoaded()
 void MainWindow::on_pushButton_clicked()
 {
     QMessageBox aMessageBox;
-    aMessageBox.setText("MUSIC Anonymisation tool - Copyright 2015");
+    aMessageBox.setText("MUSIC Anonymisation tool \n\nCopyright (c) 2014-2015, IHU Liryc, Université de Bordeaux and Inria.");
+    aMessageBox.setIconPixmap(QPixmap(":/pixmaps/small_masks.png"));
     aMessageBox.exec();
 }
