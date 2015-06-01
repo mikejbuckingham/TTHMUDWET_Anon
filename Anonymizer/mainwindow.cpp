@@ -453,6 +453,7 @@ void MainWindow::dataLoaded()
         aMessageBox.setText("Load failed!");
         aMessageBox.exec();
 
+        this->doNotClose = false;
         this->ui->SaveOpenText->setVisible(false);
         this->ui->progressBar->setVisible(false);
         this->ui->folderNameLabel->setText("");
