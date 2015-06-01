@@ -24,7 +24,7 @@
 #ifdef __APPLE__
 #include <qtconcurrentrun.h>
 #else
-#include <QtConcurrent/QtConcurrent>
+#include <QtConcurrent/QtConcurrent> /*Linux-Windows*/
 #endif
 
 #include <QThread>
@@ -154,10 +154,10 @@ void MainWindow::on_newPushButton_clicked()
     if (!firstInput && (this->nameString != "" || this->dateString != ""))
     {
         QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "New Session?", "Keep anonymisation key?",
+        reply = QMessageBox::question(this, "New Session?", "Remove anonymisation names?",
                                       QMessageBox::Yes|QMessageBox::No);
 
-        if (reply == QMessageBox::Yes)
+        if (reply == QMessageBox::No)
         {
             this->ui->newDobBox->setVisible(true);
             this->ui->newNameBox->setVisible(true);
