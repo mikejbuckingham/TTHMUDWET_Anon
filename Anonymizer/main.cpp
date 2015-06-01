@@ -25,10 +25,7 @@ int main(int argc, char *argv[])
     {
         f.open(QFile::ReadOnly | QFile::Text);
         QTextStream ts(&f);
-
         medStyleSheetParser aStyleSheetParser(ts.readAll());
-
-
         a.setStyleSheet(aStyleSheetParser.result());
     }
 

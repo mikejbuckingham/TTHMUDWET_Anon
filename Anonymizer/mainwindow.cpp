@@ -21,11 +21,12 @@
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 
-#ifdef WIN32
-#include <QtConcurrent/QtConcurrent>
-#else
+#ifdef __APPLE__
 #include <qtconcurrentrun.h>
+#else
+#include <QtConcurrent/QtConcurrent> /*Linux-Windows*/
 #endif
+
 #include <QThread>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -153,10 +154,10 @@ void MainWindow::on_newPushButton_clicked()
     if (!firstInput && (this->nameString != "" || this->dateString != ""))
     {
         QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "New Session?", "Keep anonymisation key?",
+        reply = QMessageBox::question(this, "New Session?", "Remove anonymisation names?",
                                       QMessageBox::Yes|QMessageBox::No);
 
-        if (reply == QMessageBox::Yes)
+        if (reply == QMessageBox::No)
         {
             this->ui->newDobBox->setVisible(true);
             this->ui->newNameBox->setVisible(true);
@@ -452,6 +453,7 @@ void MainWindow::dataLoaded()
         aMessageBox.setText("Load failed!");
         aMessageBox.exec();
 
+        this->doNotClose = false;
         this->ui->SaveOpenText->setVisible(false);
         this->ui->progressBar->setVisible(false);
         this->ui->folderNameLabel->setText("");
@@ -494,6 +496,7 @@ void MainWindow::dataLoaded()
 void MainWindow::on_pushButton_clicked()
 {
     QMessageBox aMessageBox;
-    aMessageBox.setText("MUSIC Anonymisation tool - Copyright 2015");
+    aMessageBox.setText("MUSIC Anonymisation tool \n\nCopyright (c) 2014-2015, IHU Liryc, Université de Bordeaux and Inria.");
+    aMessageBox.setIconPixmap(QPixmap(":/pixmaps/small_masks.png"));
     aMessageBox.exec();
 }

@@ -6,15 +6,22 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>420</width>
-    <height>237</height>
+    <width>449</width>
+    <height>242</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="anonymiser.qrc">
+    <normaloff>:/pixmaps/small_masks.png</normaloff>:/pixmaps/small_masks.png</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true"/>
+  </property>
+  <property name="toolButtonStyle">
+   <enum>Qt::ToolButtonIconOnly</enum>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QWidget" name="layoutWidget">
@@ -46,9 +53,9 @@
    <widget class="QLabel" name="folderNameLabel">
     <property name="geometry">
      <rect>
-      <x>130</x>
+      <x>20</x>
       <y>20</y>
-      <width>271</width>
+      <width>401</width>
       <height>21</height>
      </rect>
     </property>
@@ -59,8 +66,8 @@
    <widget class="QPushButton" name="savePushButton">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>240</y>
+      <x>360</x>
+      <y>260</y>
       <width>85</width>
       <height>29</height>
      </rect>
@@ -72,8 +79,8 @@
    <widget class="QPushButton" name="setStringsButton">
     <property name="geometry">
      <rect>
-      <x>200</x>
-      <y>240</y>
+      <x>270</x>
+      <y>260</y>
       <width>87</width>
       <height>29</height>
      </rect>
@@ -85,9 +92,9 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>70</y>
-      <width>215</width>
+      <x>140</x>
+      <y>60</y>
+      <width>261</width>
       <height>74</height>
      </rect>
     </property>
@@ -125,7 +132,7 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>120</x>
+      <x>140</x>
       <y>160</y>
       <width>285</width>
       <height>31</height>
@@ -155,25 +162,21 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>12</x>
-      <y>20</y>
-      <width>100</width>
+      <x>10</x>
+      <y>50</y>
+      <width>109</width>
       <height>136</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QPushButton" name="newPushButton">
-       <property name="text">
-        <string>New</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QPushButton" name="openFolderPushButton">
+       <property name="toolTip">
+        <string>Open a folder with your DICOMs</string>
+       </property>
        <property name="text">
         <string>Open Folder</string>
        </property>
@@ -181,13 +184,29 @@
      </item>
      <item>
       <widget class="QPushButton" name="closeFilePushbutton">
+       <property name="toolTip">
+        <string>Close your DICOM file</string>
+       </property>
        <property name="text">
         <string>Close File</string>
        </property>
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="newPushButton">
+       <property name="toolTip">
+        <string>Close your DICOM file and clear anonymisation names</string>
+       </property>
+       <property name="text">
+        <string>Close and Clear</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="pushButton">
+       <property name="toolTip">
+        <string>About this tool</string>
+       </property>
        <property name="text">
         <string>About</string>
        </property>
@@ -202,7 +221,6 @@
    <zorder>layoutWidget</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>folderNameLabel</zorder>
-   <zorder>pushButton</zorder>
   </widget>
   <action name="action_Open">
    <property name="text">
@@ -226,6 +244,8 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="anonymiser.qrc"/>
+ </resources>
  <connections/>
 </ui>
