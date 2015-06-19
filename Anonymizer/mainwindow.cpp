@@ -21,10 +21,10 @@
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 
-#ifdef __APPLE__
-#include <qtconcurrentrun.h>
+#ifdef WIN32
+#include <QtConcurrent/QtConcurrent>
 #else
-#include <QtConcurrent/QtConcurrent> /*Linux-Windows*/
+#include <qtconcurrentrun.h>
 #endif
 
 #include <QThread>
@@ -316,6 +316,11 @@ void MainWindow::saveZip()
 
     if (fileName == "")
         return;
+
+    // need to determine if the filename already contains .zip!
+
+    if (!fileName.contains(".zip"))
+        fileName = fileName + ".zip";
 
     this->ui->SaveOpenText->setText("Saving...");
     this->ui->SaveOpenText->setVisible(true);

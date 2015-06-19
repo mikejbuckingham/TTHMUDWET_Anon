@@ -92,7 +92,7 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>140</x>
+      <x>160</x>
       <y>60</y>
       <width>261</width>
       <height>74</height>
@@ -132,7 +132,7 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>140</x>
+      <x>160</x>
       <y>160</y>
       <width>285</width>
       <height>31</height>
@@ -167,7 +167,7 @@
      <rect>
       <x>10</x>
       <y>50</y>
-      <width>109</width>
+      <width>141</width>
       <height>136</height>
      </rect>
     </property>
