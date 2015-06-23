@@ -18,8 +18,8 @@
 
 #include <DirMaker.h>
 
-#include <quazip/quazip.h>
-#include <quazip/quazipfile.h>
+#include "dlls/headers/quazip.h"
+#include "dlls/headers/quazipfile.h"
 
 #ifdef WIN32
 #include <QtConcurrent/QtConcurrent>

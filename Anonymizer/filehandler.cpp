@@ -13,8 +13,9 @@
 #include <QDir>
 #include <QDirIterator>
 
-#include <quazip/quazip.h>
-#include <quazip/quazipfile.h>
+#include "dlls/headers/quazip.h"
+#include "dlls/headers/quazipfile.h"
+
 
 #include <medStyleSheetParser.h>
 
