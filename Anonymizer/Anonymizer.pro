@@ -15,12 +15,14 @@ win32:DEPENDPATH += dlls
 win32:LIBS += -L..\Anonymizer\dlls -lquazip
 
 unix:LIBS += -L/lib/x86_64-linux-gnu/ -lz
+unix:LIBS += -L../Anonymizer/dlls -lquazip
 
 #This doesn't work :/
 #win32: $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
 #$$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
 
 win32:RC_ICONS += pixmaps/anon.ico
+macx:ICON += pixmaps/anon.icns
 
 SOURCES += main.cpp\
         mainwindow.cpp \
