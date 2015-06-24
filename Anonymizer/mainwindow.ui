@@ -104,7 +104,7 @@
        <item>
         <widget class="QLabel" name="newNameLabel">
          <property name="text">
-          <string>New Name:</string>
+          <string>Patient Name</string>
          </property>
         </widget>
        </item>
@@ -118,7 +118,7 @@
        <item>
         <widget class="QLabel" name="NewDobLabel">
          <property name="text">
-          <string>New DoB:</string>
+          <string>Date of birth</string>
          </property>
         </widget>
        </item>
@@ -132,27 +132,13 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>160</x>
+      <x>264</x>
       <y>160</y>
-      <width>285</width>
+      <width>181</width>
       <height>31</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_4">
-     <item>
-      <widget class="QRadioButton" name="radioFolder">
-       <property name="text">
-        <string>Folder</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="radioZip">
-       <property name="text">
-        <string>Zip</string>
-       </property>
-      </widget>
-     </item>
      <item>
       <widget class="QPushButton" name="anonPushButton">
        <property name="text">

@@ -37,7 +37,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowTitle("MUSIC Dicom Anonymisation Tool");
     this->firstInput = true;
     this->isAnon = false;
-    this->ui->radioZip->setChecked(true);
     this->dateString = "";
     this->nameString = "";
     this->nameLength = 0;
@@ -54,8 +53,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // normal stuff
 
-    this->ui->radioZip->setVisible(false);
-    this->ui->radioFolder->setVisible(false);
     this->ui->anonPushButton->setVisible(false);
 
     this->ui->newDobBox->setVisible(false);
@@ -266,14 +263,7 @@ void MainWindow::on_anonPushButton_clicked()
 
         this->isAnon = true;
 
-        if (this->ui->radioFolder->isChecked())
-        {
-            saveFolder();
-        }
-        else if (this->ui->radioZip->isChecked())
-        {
-            saveZip();
-        }
+        saveZip();
 
     }
     else
@@ -419,8 +409,6 @@ bool MainWindow::closeFiles()
     this->ui->folderNameLabel->setText("");
     this->ui->folderNameLabel->setVisible(false);
 
-    this->ui->radioZip->setVisible(false);
-    this->ui->radioFolder->setVisible(false);
     this->ui->anonPushButton->setVisible(false);
 
     return true;
@@ -488,8 +476,6 @@ void MainWindow::dataLoaded()
 
     this->doNotClose = false;
 
-    this->ui->radioZip->setVisible(true);
-    this->ui->radioFolder->setVisible(true);
     this->ui->anonPushButton->setVisible(true);
 
     this->ui->newDobBox->setVisible(true);
